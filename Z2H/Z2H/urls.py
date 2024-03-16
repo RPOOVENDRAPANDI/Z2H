@@ -31,4 +31,5 @@ urlpatterns = [
     ),
     path('api/z2h/app/', include('apps.app.urls')),
     path('api/z2h/user/', include('apps.user.urls')),
+    path('api/z2h/utils/', include('apps.utils.urls')),
 ]

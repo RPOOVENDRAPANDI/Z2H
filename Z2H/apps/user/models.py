@@ -4,8 +4,10 @@ from django.contrib.auth.models import (
     BaseUserManager, 
     PermissionsMixin
 )
-
-from apps.utils.models import ZeroToHeroBaseModel
+from apps.utils.models import (
+    ZeroToHeroBaseModel,
+    District,
+)
 
 # Create your models here.
 
@@ -28,9 +30,7 @@ class UserManager(BaseUserManager):
             raise ValueError('User must have an email address.')
         user = self.model(email=self.normalize_email(email), **extra_field)
         user.set_password(password)
-        user.is_active = False
         user.is_superuser = False
-        user.is_staff = True
         user.save(using=self._db)
         return user
     
@@ -39,7 +39,6 @@ class UserManager(BaseUserManager):
         user = self.create_user(email=email, password=password)
         user.is_staff = True
         user.is_superuser = True
-        user.is_active = True
         user.save(using=self._db)
 
         return user
@@ -47,6 +46,9 @@ class UserManager(BaseUserManager):
 class Z2HUser(AbstractBaseUser, PermissionsMixin, ZeroToHeroBaseModel):
     email = models.EmailField(max_length=255, unique=True)
     name = models.CharField(max_length=255)
+    is_staff = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
+    is_superuser = models.BooleanField(default=False)
 
     objects = UserManager()
 
@@ -56,26 +58,37 @@ class Z2HUser(AbstractBaseUser, PermissionsMixin, ZeroToHeroBaseModel):
         return self.email
     
 
-class Z2HUserDetails(ZeroToHeroBaseModel):
+class RegisterUser(ZeroToHeroBaseModel):
+    MARITAL_CHOICES = (
+        ('single', 'single'),
+        ('married', 'married'),
+    )
     GENDER_CHOICES = (
         ('male', 'male'),
         ('female', 'female'),
         ('others', 'others'),
     )
 
-    user = models.ForeignKey(Z2HUser, on_delete=models.CASCADE, related_name='users', null=False, blank=False)
+    referred_by = models.ForeignKey(Z2HUser, on_delete=models.PROTECT, related_name="users", null=False, blank=False)
     role = models.ForeignKey(Role, on_delete=models.PROTECT, related_name='users', null=False, blank=False)
-    dob = models.DateField(null=True)
-    gender = models.CharField(max_length=64, choices=GENDER_CHOICES, default='male', null=False, blank=False)
-    mobile_number = models.CharField(max_length=15, null=False, blank=False)
-    address = models.TextField(null=False, blank=False)
+    user = models.OneToOneField(Z2HUser, on_delete=models.PROTECT, related_name="user", null=True, blank=True)
+    name = models.CharField(max_length=128, null=False, blank=False)
+    nominee_name = models.CharField(max_length=128, null=False, blank=False)
+    date_of_birth = models.DateField(null=False, blank=False)
+    marital_status = models.CharField(max_length=64, choices=MARITAL_CHOICES, null=False, blank=False)
+    gender = models.CharField(max_length=64, choices=GENDER_CHOICES, null=False, blank=False)
     aadhar_number = models.CharField(max_length=12, null=False, blank=False)
-    aadhar_image = models.CharField(max_length=256, null=False, blank=False)
-    pan_number = models.CharField(max_length=10, null=False, blank=False)
-    pan_image = models.CharField(max_length=256, null=False, blank=False)
-    bank_account_number = models.CharField(max_length=64, null=False, blank=False)
-    bank_account_name = models.CharField(max_length=128, null=False, blank=False)
+    pan = models.CharField(max_length=10, null=True, blank=True)
+    mobile_number = models.CharField(max_length=64, null=False, blank=False, unique=True)
+    present_address = models.TextField(null=False, blank=False)
+    district = models.ForeignKey(District, on_delete=models.PROTECT, related_name='users', null=False, blank=False)
+    pin_code = models.CharField(max_length=6, null=False, blank=False)
+    name_of_bank = models.CharField(max_length=128, null=False, blank=False)
+    name_as_in_bank = models.CharField(max_length=256, null=False, blank=False)
     ifsc_code = models.CharField(max_length=11, null=False, blank=False)
-    user_image = models.CharField(max_length=256, null=False, blank=False)
+    bank_branch = models.CharField(max_length=128, null=False, blank=False)
+    account_number = models.CharField(max_length=64, null=False, blank=False)
+    profile_photo_path = models.CharField(max_length=256, null=True, blank=True)
 
-
+    def __str__(self):
+        return self.name
