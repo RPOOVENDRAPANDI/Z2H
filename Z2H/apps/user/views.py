@@ -110,10 +110,13 @@ class RegisterUserView(APIView):
 
             serializer.save()
 
+            user_uid = Z2HUser.objects.get(email=new_user_password['email']).uid
+
             data = {
                 "status": "Success",
                 "message": "User Created Successfully!!!",
                 "password": new_user_password['password'],
+                "uid": user_uid,
                 "one_time_password": one_time_password
             }
 
