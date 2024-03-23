@@ -11,7 +11,7 @@ from apps.user.serializers import (
     UserPasswordUpdateSerializer,
 )
 from apps.user.permissions import ReferrerLimitPermission
-from apps.user.models import Z2HUser, RegisterUser
+from apps.user.models import Z2HUser
 import random
 import string
 
