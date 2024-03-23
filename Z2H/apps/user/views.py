@@ -69,9 +69,6 @@ class RegisterUserView(APIView):
         
         return None
     
-    def get_generate_otp(self):
-        return random.randint(1000, 9999)
-    
     def post(self, request, *args, **kwargs):
         request_data = request.data
 
@@ -105,8 +102,6 @@ class RegisterUserView(APIView):
                     "message": "User Already Exists!!!"
                 }
                 return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-            
-            one_time_password = self.get_generate_otp()
 
             serializer.save()
 
@@ -117,7 +112,6 @@ class RegisterUserView(APIView):
                 "message": "User Created Successfully!!!",
                 "password": new_user_password['password'],
                 "uid": user_uid,
-                "one_time_password": one_time_password
             }
 
             return Response(data=data, status=status.HTTP_201_CREATED)
