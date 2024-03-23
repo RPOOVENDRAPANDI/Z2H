@@ -11,7 +11,9 @@ app_name = 'user'
 # urlpatterns = router.urls
 urlpatterns = [
     path('create/', views.CreateUserView.as_view(), name='create'),
-    path('token/', views.CreateTokenView.as_view(), name="token"),
+    path('login/', views.UserLoginView.as_view(), name="token"),
+    path('logout/', views.UserLogoutView.as_view(), name="logout"),
+    path('update_password/', views.UpdatePasswordView.as_view(), name="update-password"),
     path('me/', views.ManageUserView.as_view(), name="me"),
     path('register/', views.RegisterUserView.as_view(), name="register-user")
 ]
