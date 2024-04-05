@@ -17,6 +17,17 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         return get_user_model().objects.create_user(**validated_data)
     
+class UserListSerializer(serializers.ModelSerializer):
+
+    mobile_number = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = get_user_model()
+        fields = ['name', 'uid', 'mobile_number']
+
+    def get_mobile_number(self, obj):
+        return obj.email.split("@")[0]
+    
 class AuthTokenSerializer(serializers.Serializer):
     mobile_number = serializers.CharField()
     password = serializers.CharField(

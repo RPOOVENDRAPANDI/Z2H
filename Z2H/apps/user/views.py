@@ -9,6 +9,7 @@ from apps.user.serializers import (
     AuthTokenSerializer,
     RegisterUserSerializer,
     UserPasswordUpdateSerializer,
+    UserListSerializer,
 )
 from apps.user.permissions import ReferrerLimitPermission
 from apps.user.models import Z2HUser
@@ -28,6 +29,16 @@ class ManageUserView(generics.RetrieveAPIView):
     def get_object(self):
         """Retrive and return the authenticated user."""
         return self.request.user
+
+class ListUsersView(generics.ListAPIView):
+    """List all the users in the system."""
+    serializer_class = UserListSerializer
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        """Return all the users."""
+        return Z2HUser.objects.all()
 
 class UserLoginView(ObtainAuthToken):
     """Create a new auth token for user."""

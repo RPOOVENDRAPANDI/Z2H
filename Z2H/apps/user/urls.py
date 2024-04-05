@@ -15,5 +15,6 @@ urlpatterns = [
     path('logout/', views.UserLogoutView.as_view(), name="logout"),
     path('update_password/', views.UpdatePasswordView.as_view(), name="update-password"),
     path('me/', views.ManageUserView.as_view(), name="me"),
-    path('register/', views.RegisterUserView.as_view(), name="register-user")
+    path('register/', views.RegisterUserView.as_view(), name="register-user"),
+    path('users_list/', views.ListUsersView.as_view(), name="users-list"),
 ]
