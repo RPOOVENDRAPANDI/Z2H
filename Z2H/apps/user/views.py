@@ -33,8 +33,8 @@ class ManageUserView(generics.RetrieveAPIView):
 class ListUsersView(generics.ListAPIView):
     """List all the users in the system."""
     serializer_class = UserListSerializer
-    authentication_classes = [authentication.TokenAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = []
+    permission_classes = []
 
     def get_queryset(self):
         """Return all the users."""
