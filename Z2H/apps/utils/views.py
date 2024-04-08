@@ -41,7 +41,7 @@ class UploadImageView(APIView):
     def post(self, request):
         upload_type = request.data.get('upload_type')
 
-        is_valida_upload_type = True if upload_type in ['profile_image'] else False
+        is_valida_upload_type = True if upload_type in ['profile_image', 'product_image'] else False
 
         if not is_valida_upload_type:
             data = {
