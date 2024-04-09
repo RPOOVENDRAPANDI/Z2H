@@ -5,4 +5,15 @@ app_name = 'plan_details'
 
 urlpatterns = [
     path('plan_details/', views.Z2HPlanDetailsListView.as_view(), name='plan_details'),
+    path('product_categories/', views.Z2HProductCategoriesListView.as_view(), name='product_categories'),
+    path(
+        r'product_sub_categories/<str:product_category_uid>/', 
+        views.Z2HProductSubCategoriesListView.as_view(), 
+        name='product_sub_categories'
+    ),
+    path(
+        r'products/<str:product_sub_category_uid>/',
+        views.Z2HProductListView.as_view(),
+        name="products"
+    ),
 ]
