@@ -13,7 +13,10 @@ urlpatterns = [
     ),
     path(
         r'products/<str:product_sub_category_uid>/',
-        views.Z2HProductListView.as_view(),
+        views.Z2HProductsView.as_view(),
         name="products"
     ),
+    path(
+        r'products_list/', views.Z2HProductsListView.as_view(), name="products_list"
+    )
 ]

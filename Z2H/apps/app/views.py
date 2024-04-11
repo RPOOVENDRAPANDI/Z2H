@@ -40,7 +40,7 @@ class Z2HProductSubCategoriesListView(ListAPIView):
     def get_queryset(self):
         return Z2HProductSubCategories.objects.filter(category__uid=self.kwargs['product_category_uid'])
     
-class Z2HProductListView(ListAPIView):
+class Z2HProductsView(ListAPIView):
     queryset = Z2HProducts.objects.all()
     serializer_class = Z2HProductSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -51,3 +51,12 @@ class Z2HProductListView(ListAPIView):
 
     def get_queryset(self):
         return Z2HProducts.objects.filter(sub_category__uid=self.kwargs['product_sub_category_uid'])
+    
+class Z2HProductsListView(ListAPIView):
+    queryset = Z2HProducts.objects.all()
+    serializer_class = Z2HProductSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [authentication.TokenAuthentication]
+
+    def get_queryset(self):
+        return Z2HProducts.objects.all()
