@@ -31,12 +31,14 @@ class Z2HProductSubCategoriesSerializer(serializers.ModelSerializer):
 
 class Z2HProductSerializer(serializers.ModelSerializer):
     product_image_urls = serializers.SerializerMethodField()
+    sub_category_uid = serializers.CharField(source='sub_category.uid')
+    category_uid = serializers.CharField(source='sub_category.category.uid')
 
     class Meta:
         model = Z2HProducts
         fields = (
-            'id', 'is_active', 'uid', 'name', 'description', 'sub_category', 'product_image_urls', 'price', 'discount',
-            'offer_price'
+            'id', 'is_active', 'uid', 'name', 'description', 'sub_category_uid', 'category_uid', 'product_image_urls', 
+            'price', 'discount', 'offer_price'
         )
 
     def get_product_image_urls(self, obj):
