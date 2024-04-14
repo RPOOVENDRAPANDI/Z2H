@@ -1,17 +1,21 @@
 from django.shortcuts import render
 from rest_framework.generics import ListAPIView
-from rest_framework import authentication, permissions
+from rest_framework.response import Response
+from rest_framework import authentication, permissions, status
 from .models import (
     Z2HPlanDetails,
     Z2HProductCategories,
     Z2HProductSubCategories,
     Z2HProducts,
+    Z2HOrderItems,
 )
 from apps.app.serializers import (
     Z2HPlanDetailsSerializer,
     Z2HProductCategoriesSerializer,
     Z2HProductSubCategoriesSerializer,
     Z2HProductSerializer,
+    Z2HOrderSerializer,
+    Z2HOrderItemSerializer,
 )
 
 # Create your views here.
@@ -60,3 +64,27 @@ class Z2HProductsListView(ListAPIView):
 
     def get_queryset(self):
         return Z2HProducts.objects.all()
+    
+class Z2HOrdersListView(ListAPIView):
+    queryset = Z2HOrderItems.objects.all()
+    serializer_class = Z2HOrderItemSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [authentication.TokenAuthentication]
+    lookup_field = 'uid'
+    lookup_url_kwarg = 'uid'
+    lookup_value_regex = '[0-9a-f-]{36}'
+
+    def get_queryset(self):
+        return Z2HOrderItems.objects.filter(order__ordered_by=self.request.user, product__uid=self.kwargs['product_uid'])
+    
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        order = queryset.first().order
+
+        data = {
+            "products": self.get_serializer(queryset, many=True).data,
+            "order": Z2HOrderSerializer(order).data
+        }
+
+        return Response(data, status=status.HTTP_200_OK)
+    

@@ -5,6 +5,8 @@ from .models import (
     Z2HProductSubCategories,
     Z2HProducts,
     Z2HProductImages,
+    Z2HOrders,
+    Z2HOrderItems,
 )
 
 class Z2HPlanDetailsSerializer(serializers.ModelSerializer):
@@ -43,3 +45,54 @@ class Z2HProductSerializer(serializers.ModelSerializer):
 
     def get_product_image_urls(self, obj):
         return [image.product_image_url for image in Z2HProductImages.objects.filter(product=obj, is_active=True)]
+    
+class Z2HOrderSerializer(serializers.ModelSerializer):
+    order_id = serializers.CharField(source='uid')
+    delivery_through = serializers.SerializerMethodField()
+    delivery_number = serializers.SerializerMethodField()
+    delivery_address = serializers.SerializerMethodField()
+    payment_mode = serializers.SerializerMethodField()
+    payment_status = serializers.SerializerMethodField()
+    payment_date = serializers.SerializerMethodField()
+    payment_reference = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Z2HOrders
+        fields = (
+            'order_id', 'order_date', 'order_cgst_amount', 'order_sgst_amount', 'order_igst_amount', 'order_gst_total_amount',
+            'order_total_amount', 'order_status', 'delivery_date', 'delivery_through', 'delivery_number', 'delivery_address',
+            'payment_mode', 'payment_status', 'payment_date', 'payment_reference',
+        )
+
+    def get_delivery_through(self, obj):
+        return obj.delivery_details.get('delivery_through', None)
+    
+    def get_delivery_number(self, obj):
+        return obj.delivery_details.get('delivery_number', None)
+    
+    def get_delivery_address(self, obj):
+        return obj.delivery_details.get('delivery_address', None)
+    
+    def get_payment_mode(self, obj):
+        return obj.payment_details.get('payment_mode', None)
+    
+    def get_payment_status(self, obj):
+        return obj.payment_details.get('payment_status', None)
+    
+    def get_payment_date(self, obj):
+        return obj.payment_details.get('payment_date', None)
+    
+    def get_payment_reference(self, obj):
+        return obj.payment_details.get('payment_reference', None)
+    
+class Z2HOrderItemSerializer(serializers.ModelSerializer):
+    product_id = serializers.CharField(source='product.uid')
+    product_name = serializers.CharField(source='product.name')
+
+    class Meta:
+        model = Z2HOrderItems
+        fields = (
+            'product_id', 'product_name', 'quantity', 'hsn_code', 'price', 'cgst_percentage', 'cgst_amount', 'sgst_percentage',
+            'sgst_amount', 'igst_percentage', 'igst_amount', 'gst_total_amount', 'total_amount'
+        )
+    
