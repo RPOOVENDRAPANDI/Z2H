@@ -81,11 +81,10 @@ class RegisterUser(ZeroToHeroBaseModel):
     aadhar_number = models.CharField(max_length=12, null=False, blank=False)
     pan = models.CharField(max_length=10, null=True, blank=True)
     mobile_number = models.CharField(max_length=64, null=False, blank=False, unique=True)
-    present_address = models.TextField(null=False, blank=False)
     district = models.ForeignKey(District, on_delete=models.PROTECT, related_name='users', null=False, blank=False)
-    city = models.CharField(max_length=128, null=True, blank=True)
-    town = models.CharField(max_length=128, null=True, blank=True)
-    address = models.TextField(null=True, blank=True)
+    city = models.CharField(max_length=128, null=False, blank=False)
+    town = models.CharField(max_length=128, null=False, blank=False)
+    address = models.TextField(null=False, blank=False)
     pin_code = models.CharField(max_length=6, null=False, blank=False)
     name_of_bank = models.CharField(max_length=128, null=False, blank=False)
     name_as_in_bank = models.CharField(max_length=256, null=False, blank=False)
@@ -93,6 +92,7 @@ class RegisterUser(ZeroToHeroBaseModel):
     bank_branch = models.CharField(max_length=128, null=False, blank=False)
     account_number = models.CharField(max_length=64, null=False, blank=False)
     profile_photo_path = models.CharField(max_length=256, null=True, blank=True)
+    email_address = models.CharField(max_length=256, null=False, blank=False)
 
     def __str__(self):
         return self.name

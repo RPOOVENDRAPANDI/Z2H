@@ -20,6 +20,8 @@ from apps.app.serializers import (
 
 # Create your views here.
 
+LOOKUP_REGEX = '[0-9a-f-]{36}'
+
 class Z2HPlanDetailsListView(ListAPIView):
     queryset = Z2HPlanDetails.objects.all()
     serializer_class = Z2HPlanDetailsSerializer
@@ -39,7 +41,7 @@ class Z2HProductSubCategoriesListView(ListAPIView):
     authentication_classes = [authentication.TokenAuthentication]
     lookup_field = 'uid'
     lookup_url_kwarg = 'uid'
-    lookup_value_regex = '[0-9a-f-]{36}'
+    lookup_value_regex = LOOKUP_REGEX
 
     def get_queryset(self):
         return Z2HProductSubCategories.objects.filter(category__uid=self.kwargs['product_category_uid'])
@@ -51,7 +53,7 @@ class Z2HProductsView(ListAPIView):
     authentication_classes = [authentication.TokenAuthentication]
     lookup_field = 'uid'
     lookup_url_kwarg = 'uid'
-    lookup_value_regex = '[0-9a-f-]{36}'
+    lookup_value_regex = LOOKUP_REGEX
 
     def get_queryset(self):
         return Z2HProducts.objects.filter(sub_category__uid=self.kwargs['product_sub_category_uid'])
@@ -72,7 +74,7 @@ class Z2HOrdersListView(ListAPIView):
     authentication_classes = [authentication.TokenAuthentication]
     lookup_field = 'uid'
     lookup_url_kwarg = 'uid'
-    lookup_value_regex = '[0-9a-f-]{36}'
+    lookup_value_regex = LOOKUP_REGEX
 
     def get_queryset(self):
         return Z2HOrderItems.objects.filter(order__ordered_by=self.request.user, product__uid=self.kwargs['product_uid'])
