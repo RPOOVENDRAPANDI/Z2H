@@ -12,7 +12,8 @@ from apps.user.serializers import (
     UserListSerializer,
 )
 from apps.user.permissions import ReferrerLimitPermission
-from apps.user.models import Z2HUser
+from apps.user.models import Z2HUser, Z2HCustomers
+from apps.utils.tasks import send_email
 import random
 import string
 
@@ -50,15 +51,7 @@ class UserLoginView(ObtainAuthToken):
             'status': 'success',
             'message': 'Login Successful',
         }
-        mobile_number = request.data.get('mobile_number')
-
-        user_email = str(mobile_number) + "@z2h.com"
-        user = Z2HUser.objects.filter(email=user_email).first()
-
-        if user and not user.is_password_updated:
-            data['message'] = 'Please update your password'
-            data['status'] = 'update_password'
-
+        
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
@@ -107,8 +100,20 @@ class RegisterUserView(APIView):
     permission_classes = [ReferrerLimitPermission, ]
 
     def generate_password(self, length=8):
-        characters = string.ascii_letters + string.digits
-        return ''.join(random.choice(characters) for _ in range(length))
+        letters = string.ascii_letters
+        digits = string.digits
+        special_chars = string.punctuation
+
+        password = ''.join(random.choices(letters, k=length-2))
+        password += random.choice(letters.upper())
+        password += random.choice(digits)
+        password += random.choice(special_chars)
+
+        password_list = list(password)
+        random.shuffle(password_list)
+        password = ''.join(password_list)
+
+        return password
 
     def get_create_new_user(self, request_data):
         mobile_number = request_data.get('mobile_number')
@@ -141,7 +146,7 @@ class RegisterUserView(APIView):
     def post(self, request, *args, **kwargs):
         request_data = request.data
 
-        referred_by = Z2HUser.objects.filter(uid=request_data.get('referred_by')).first()
+        referred_by = Z2HCustomers.objects.filter(uid=request_data.get('referred_by')).first()
 
         if not referred_by:
             data = {
@@ -176,12 +181,19 @@ class RegisterUserView(APIView):
 
             user_uid = Z2HUser.objects.get(email=new_user_password['email']).uid
 
+            password = new_user_password['password']
+
             data = {
                 "status": "Success",
                 "message": "User Created Successfully!!!",
-                "password": new_user_password['password'],
+                "password": password,
                 "uid": user_uid,
             }
+
+            subject = "Zero To Hero Login Credentials"
+            body = f"The System Generated Password of Zero To Hero Login for User {request_data['name']} is {password}"
+            
+            send_email(to_email=request_data['email_address'], body=body, subject=subject)
 
             return Response(data=data, status=status.HTTP_201_CREATED)
 

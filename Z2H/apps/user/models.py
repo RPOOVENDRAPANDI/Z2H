@@ -63,7 +63,7 @@ class Z2HCustomers(ZeroToHeroBaseModel):
     referrer = models.ForeignKey("self", on_delete=models.SET_NULL, related_name="customer", null=True, blank=True)
     active_plan_uid = models.CharField(max_length=64, null=False, blank=False)
     plan_start_date = models.DateField(null=False, blank=False)
-    plan_end_date = models.DateField(null=False, blank=False)
+    plan_end_date = models.DateField(null=True, blank=True)
     is_level_one_completed = models.BooleanField(default=False)
     is_level_two_completed = models.BooleanField(default=False)
     is_level_three_completed = models.BooleanField(default=False)

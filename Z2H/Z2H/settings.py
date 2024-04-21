@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'drf_spectacular',
+    'django_dramatiq',
 
     'apps.app',
     'apps.user',
@@ -153,3 +154,20 @@ REST_FRAMEWORK = {
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
+
+DRAMATIQ_BROKER = {
+    "BROKER": os.environ["RABBITMQ_BROKER"],
+    "OPTIONS": {
+        "url": os.environ["RABBITMQ_URL"],
+    },
+    "MIDDLEWARE": [
+        "dramatiq.middleware.Prometheus",
+        "dramatiq.middleware.AgeLimit",
+        "dramatiq.middleware.TimeLimit",
+        "dramatiq.middleware.Callbacks",
+        "dramatiq.middleware.Retries",
+        "django_dramatiq.middleware.DbConnectionsMiddleware",
+        "django_dramatiq.middleware.AdminMiddleware",
+    ]
+}
+DRAMATIQ_TASKS_DATABASE = "default"
