@@ -57,9 +57,20 @@ class Z2HUser(AbstractBaseUser, PermissionsMixin, ZeroToHeroBaseModel):
 
     def __str__(self):
         return self.email
-    
+
+class Z2HCustomers(ZeroToHeroBaseModel):
+    user = models.ForeignKey(Z2HUser, on_delete=models.PROTECT, related_name="users", null=False, blank=False)
+    referrer = models.ForeignKey("self", on_delete=models.SET_NULL, related_name="customer", null=True, blank=True)
+    active_plan_uid = models.CharField(max_length=64, null=False, blank=False)
+    plan_start_date = models.DateField(null=False, blank=False)
+    plan_end_date = models.DateField(null=False, blank=False)
+    is_level_one_completed = models.BooleanField(default=False)
+    is_level_two_completed = models.BooleanField(default=False)
+    is_level_three_completed = models.BooleanField(default=False)
+    is_level_four_completed = models.BooleanField(default=False)
 
 class RegisterUser(ZeroToHeroBaseModel):
+
     MARITAL_CHOICES = (
         ('single', 'single'),
         ('married', 'married'),
@@ -70,7 +81,7 @@ class RegisterUser(ZeroToHeroBaseModel):
         ('others', 'others'),
     )
 
-    referred_by = models.ForeignKey(Z2HUser, on_delete=models.PROTECT, related_name="users", null=False, blank=False)
+    referred_by = models.ForeignKey(Z2HCustomers, on_delete=models.PROTECT, related_name="users", null=False, blank=False)
     role = models.ForeignKey(Role, on_delete=models.PROTECT, related_name='users', null=False, blank=False)
     user = models.OneToOneField(Z2HUser, on_delete=models.PROTECT, related_name="user", null=True, blank=True)
     name = models.CharField(max_length=128, null=False, blank=False)
