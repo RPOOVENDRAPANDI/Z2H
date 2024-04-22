@@ -8,6 +8,7 @@ from .models import (
     Z2HProductSubCategories,
     Z2HProducts,
     Z2HOrderItems,
+    Z2HAdvertisements,
 )
 from apps.app.serializers import (
     Z2HPlanDetailsSerializer,
@@ -16,6 +17,7 @@ from apps.app.serializers import (
     Z2HProductSerializer,
     Z2HOrderSerializer,
     Z2HOrderItemSerializer,
+    Z2HAdvertisementsSerializer,
 )
 
 # Create your views here.
@@ -90,3 +92,11 @@ class Z2HOrdersListView(ListAPIView):
 
         return Response(data, status=status.HTTP_200_OK)
     
+class Z2HAdVideosView(ListAPIView):
+    queryset = Z2HAdvertisements.objects.all()
+    serializer_class = Z2HAdvertisementsSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [authentication.TokenAuthentication]
+
+    def get_queryset(self):
+        return Z2HAdvertisements.objects.filter(name='demo_video', is_active=True)

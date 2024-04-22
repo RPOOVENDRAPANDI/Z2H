@@ -50,6 +50,7 @@ class Z2HUser(AbstractBaseUser, PermissionsMixin, ZeroToHeroBaseModel):
     is_active = models.BooleanField(default=True)
     is_superuser = models.BooleanField(default=False)
     is_password_updated = models.BooleanField(default=False)
+    is_first_login = models.BooleanField(default=True)
 
     objects = UserManager()
 

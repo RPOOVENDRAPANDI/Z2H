@@ -12,6 +12,11 @@ class Z2HPlanDetails(ZeroToHeroBaseModel):
     level_four_amount = models.DecimalField(max_digits=13, decimal_places=2, null=True, blank=True)
     registration_fee = models.DecimalField(max_digits=13, decimal_places=2, null=True, blank=True)
 
+class Z2HAdvertisements(ZeroToHeroBaseModel):
+    name = models.CharField(max_length=64, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    data = models.JSONField(default=dict)
+
 class Z2HProductCategories(ZeroToHeroBaseModel):
     name = models.CharField(max_length=64, null=True, blank=True)
     description = models.TextField(null=True, blank=True)

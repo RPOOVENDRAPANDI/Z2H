@@ -21,5 +21,8 @@ urlpatterns = [
     ),
     path(
         r'orders_details/<str:product_uid>/', views.Z2HOrdersListView.as_view(), name="orders_details"
-    )
+    ),
+    path(
+        r'demo_videos/', views.Z2HAdVideosView.as_view(), name="demo_videos"
+    ),
 ]

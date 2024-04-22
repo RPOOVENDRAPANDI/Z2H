@@ -51,12 +51,23 @@ class UserLoginView(ObtainAuthToken):
             'status': 'success',
             'message': 'Login Successful',
         }
+
+        mobile_number = request.data.get('mobile_number')
+
+        user_email = str(mobile_number) + "@z2h.com"
+        z2h_user = Z2HUser.objects.filter(email=user_email).first()
+
+        if z2h_user and z2h_user.is_first_login:
+            z2h_user.is_first_login = False
         
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         token, _ = Token.objects.get_or_create(user=user)
         data['token'] = token.key
+        data['is_first_login'] = user.is_first_login
+
+        z2h_user.save()
         return Response(data, status=status.HTTP_200_OK)
     
 class UserLogoutView(APIView):
@@ -186,15 +197,46 @@ class RegisterUserView(APIView):
             data = {
                 "status": "Success",
                 "message": "User Created Successfully!!!",
-                "password": password,
                 "uid": user_uid,
             }
 
             subject = "Zero To Hero Login Credentials"
-            body = f"The System Generated Password of Zero To Hero Login for User {request_data['name']} is {password}"
+            body = f"The System Generated Password for Zero To Hero Login of User '{request_data['name']}' is {password}"
             
             send_email(to_email=request_data['email_address'], body=body, subject=subject)
 
             return Response(data=data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class ValidateReferrerView(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request, *args, **kwargs):
+        referrer_uid = request.query_params.get('referrer_uid', None)
+
+        if not referrer_uid:
+            data = {
+                "status": "Error",
+                "message": "Referrer UID is required!!!"
+            }
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+        
+        referred_by = Z2HCustomers.objects.filter(uid=referrer_uid).first()
+        if not referred_by:
+            data = {
+                "status": "Error",
+                "message": "No Referrer Found!!!"
+            }
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+        
+        data = {
+            "status": "Success",
+            "message": "Referrer Found!!!"
+        }
+
+        referrer_name = referred_by.user.name
+        data["referrer_name"] = referrer_name
+        
+        return Response(data=data, status=status.HTTP_200_OK)

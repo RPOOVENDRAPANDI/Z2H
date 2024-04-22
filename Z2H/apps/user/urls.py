@@ -4,11 +4,6 @@ from apps.user import views
 
 app_name = 'user'
 
-# router = routers.SimpleRouter()
-
-# router.register(r'register', RegisterUserView, basename="register-user")
-
-# urlpatterns = router.urls
 urlpatterns = [
     path('create/', views.CreateUserView.as_view(), name='create'),
     path('login/', views.UserLoginView.as_view(), name="token"),
@@ -17,4 +12,5 @@ urlpatterns = [
     path('me/', views.ManageUserView.as_view(), name="me"),
     path('register/', views.RegisterUserView.as_view(), name="register-user"),
     path('users_list/', views.ListUsersView.as_view(), name="users-list"),
+    path('validate_referrer/', views.ValidateReferrerView.as_view(), name="validate-referrer"),
 ]

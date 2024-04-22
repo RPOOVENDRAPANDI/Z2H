@@ -7,6 +7,7 @@ from .models import (
     Z2HProductImages,
     Z2HOrders,
     Z2HOrderItems,
+    Z2HAdvertisements,
 )
 
 class Z2HPlanDetailsSerializer(serializers.ModelSerializer):
@@ -95,4 +96,15 @@ class Z2HOrderItemSerializer(serializers.ModelSerializer):
             'product_id', 'product_name', 'quantity', 'hsn_code', 'price', 'cgst_percentage', 'cgst_amount', 'sgst_percentage',
             'sgst_amount', 'igst_percentage', 'igst_amount', 'gst_total_amount', 'total_amount'
         )
-    
+
+class Z2HAdvertisementsSerializer(serializers.ModelSerializer):
+    demo_urls = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Z2HAdvertisements
+        fields = (
+            'id', 'is_active', 'uid', 'name', 'description', 'demo_urls',
+        )
+
+    def get_demo_urls(self, obj):
+        return obj.data.get('demo_urls', [])
