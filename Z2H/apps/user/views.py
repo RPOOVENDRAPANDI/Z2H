@@ -39,7 +39,7 @@ class ListUsersView(generics.ListAPIView):
 
     def get_queryset(self):
         """Return all the users."""
-        return Z2HUser.objects.all()
+        return Z2HCustomers.objects.all()
 
 class UserLoginView(ObtainAuthToken):
     """Create a new auth token for user."""

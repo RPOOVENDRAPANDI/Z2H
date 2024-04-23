@@ -4,7 +4,7 @@ from django.contrib.auth import (
 )
 from django.utils.translation import gettext as _
 from rest_framework import serializers
-from .models import RegisterUser, Z2HUser
+from .models import RegisterUser, Z2HUser, Z2HCustomers
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -18,15 +18,18 @@ class UserSerializer(serializers.ModelSerializer):
         return get_user_model().objects.create_user(**validated_data)
     
 class UserListSerializer(serializers.ModelSerializer):
-
     mobile_number = serializers.SerializerMethodField()
+    name = serializers.SerializerMethodField()
     
     class Meta:
         model = get_user_model()
         fields = ['name', 'uid', 'mobile_number']
 
     def get_mobile_number(self, obj):
-        return obj.email.split("@")[0]
+        return obj.user.email.split("@")[0]
+    
+    def get_name(self, obj):
+        return obj.user.name
     
 class AuthTokenSerializer(serializers.Serializer):
     mobile_number = serializers.CharField()
