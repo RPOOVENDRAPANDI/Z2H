@@ -1,6 +1,7 @@
 from rest_framework import permissions
 from .models import RegisterUser
 import uuid
+import os
 
 class ReferrerLimitPermission(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -9,4 +10,4 @@ class ReferrerLimitPermission(permissions.BasePermission):
         except ValueError:
             return False
         
-        return RegisterUser.objects.filter(referred_by__uid=request.data['referred_by']).count() < 5
+        return RegisterUser.objects.filter(referred_by__uid=request.data['referred_by']).count() < int(os.environ["PRIMARY_LEG_COUNT"])

@@ -30,6 +30,7 @@ class Z2HProducts(ZeroToHeroBaseModel):
     name = models.CharField(max_length=64, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     sub_category = models.ForeignKey(Z2HProductSubCategories, on_delete=models.CASCADE, null=True, blank=True)
+    hsn_code = models.CharField(max_length=64, null=True, blank=True)
     price = models.DecimalField(max_digits=13, decimal_places=2, null=True, blank=True)
     discount = models.DecimalField(max_digits=13, decimal_places=2, null=True, blank=True)
     discount_type = models.CharField(max_length=64, null=True, blank=True)

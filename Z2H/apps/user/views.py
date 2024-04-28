@@ -59,6 +59,11 @@ class UserLoginView(ObtainAuthToken):
 
         if z2h_user and z2h_user.is_first_login:
             z2h_user.is_first_login = False
+
+        z2h_customer_uids = []
+        z2h_customer = Z2HCustomers.objects.filter(user=z2h_user)
+        if z2h_customer:
+            z2h_customer_uids = [customer.uid for customer in z2h_customer]
         
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -66,6 +71,7 @@ class UserLoginView(ObtainAuthToken):
         token, _ = Token.objects.get_or_create(user=user)
         data['token'] = token.key
         data['is_first_login'] = user.is_first_login
+        data["customer_uids"] = z2h_customer_uids
 
         z2h_user.save()
         return Response(data, status=status.HTTP_200_OK)
@@ -203,7 +209,7 @@ class RegisterUserView(APIView):
             subject = "Zero To Hero Login Credentials"
             body = f"The System Generated Password for Zero To Hero Login of User '{request_data['name']}' is {password}"
             
-            send_email(to_email=request_data['email_address'], body=body, subject=subject)
+            # send_email(to_email=request_data['email_address'], body=body, subject=subject)
 
             return Response(data=data, status=status.HTTP_201_CREATED)
 

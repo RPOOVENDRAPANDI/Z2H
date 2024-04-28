@@ -25,4 +25,7 @@ urlpatterns = [
     path(
         r'demo_videos/', views.Z2HAdVideosView.as_view(), name="demo_videos"
     ),
+    path(
+        r'update_payment/', views.PostPaymentView.as_view(), name="update_payment"
+    )
 ]
