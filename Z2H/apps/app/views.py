@@ -312,6 +312,6 @@ class PostPaymentView(APIView):
 
         if update_order_details:
             self.update_customer_details(request)
-            # self.update_referrer_level(request)
+            self.update_referrer_level(request)
 
         return Response(data=data, status=status.HTTP_200_OK)
