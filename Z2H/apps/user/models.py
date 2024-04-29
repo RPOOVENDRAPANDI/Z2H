@@ -108,3 +108,10 @@ class RegisterUser(ZeroToHeroBaseModel):
 
     def __str__(self):
         return self.name
+    
+class Z2HUserRoles(ZeroToHeroBaseModel):
+    user_uid = models.CharField(max_length=64, null=False, blank=False)
+    role_uid = models.CharField(max_length=64, null=False, blank=False)
+
+    def __str__(self):
+        return self.user_uid

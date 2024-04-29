@@ -10,9 +10,10 @@ from apps.user.serializers import (
     RegisterUserSerializer,
     UserPasswordUpdateSerializer,
     UserListSerializer,
+    WebAuthTokenSerializer,
 )
 from apps.user.permissions import ReferrerLimitPermission
-from apps.user.models import Z2HUser, Z2HCustomers
+from apps.user.models import Z2HUser, Z2HCustomers, Z2HUserRoles, Role
 from apps.utils.tasks import send_email
 import random
 import string
@@ -46,13 +47,35 @@ class UserLoginView(ObtainAuthToken):
     serializer_class = AuthTokenSerializer
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
 
+    def handle_web_login(self, request_data):
+        data = {
+            'status': 'success',
+            'message': 'Login Successful',
+            'token': None,
+        }
+
+        serializer = WebAuthTokenSerializer(data=request_data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token, _ = Token.objects.get_or_create(user=user)
+        data['token'] = token.key
+
+        return Response(data, status=status.HTTP_200_OK)
+
     def post(self, request, *args, **kwargs):
+        request_data = request.data
+
+        accessed_from = request_data.get('accessed_from', None)
+
+        if accessed_from == 'web':
+            return self.handle_web_login(request_data)
+
         data = {
             'status': 'success',
             'message': 'Login Successful',
         }
 
-        mobile_number = request.data.get('mobile_number')
+        mobile_number = request_data.get('mobile_number')
 
         user_email = str(mobile_number) + "@z2h.com"
         z2h_user = Z2HUser.objects.filter(email=user_email).first()
@@ -65,7 +88,7 @@ class UserLoginView(ObtainAuthToken):
         if z2h_customer:
             z2h_customer_uids = [customer.uid for customer in z2h_customer]
         
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(data=request_data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         token, _ = Token.objects.get_or_create(user=user)
@@ -75,6 +98,33 @@ class UserLoginView(ObtainAuthToken):
 
         z2h_user.save()
         return Response(data, status=status.HTTP_200_OK)
+    
+class GetUserInfoView(APIView):
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        data = {
+            'status': 'success',
+            'message': 'User Infomation!!!',
+        }
+        user = request.user
+        user_info = self.get_user_info(user)
+        data['user_info'] = user_info
+        return Response(data, status=status.HTTP_200_OK)
+
+    def get_user_info(self, user):
+        user_role = Z2HUserRoles.objects.filter(user_uid=str(user.uid)).first()
+        role = Role.objects.filter(uid=user_role.role_uid).first()
+
+        user_info = {
+            'uid': user.uid,
+            'name': user.name,
+            'email': user.email,
+            'role': role.name,
+        }
+
+        return user_info
     
 class UserLogoutView(APIView):
     authentication_classes = [authentication.TokenAuthentication]

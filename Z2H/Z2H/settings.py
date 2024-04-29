@@ -32,6 +32,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = os.environ['ALLOWED_HOSTS'].split(',')
 
+CORS_ORIGIN_WHITELIST = tuple(os.environ['CORS_ORIGIN_WHITELIST'].split(', '))
+CORS_ALLOW_CREDENTIALS = True
 
 # Application definition
 
@@ -48,6 +50,8 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'django_dramatiq',
 
+    'corsheaders',
+
     'apps.app',
     'apps.user',
     'apps.utils',
@@ -61,6 +65,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'Z2H.urls'

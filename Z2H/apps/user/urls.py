@@ -13,4 +13,5 @@ urlpatterns = [
     path('register/', views.RegisterUserView.as_view(), name="register-user"),
     path('users_list/', views.ListUsersView.as_view(), name="users-list"),
     path('validate_referrer/', views.ValidateReferrerView.as_view(), name="validate-referrer"),
+    path('info/', views.GetUserInfoView.as_view(), name='user-info'),
 ]
