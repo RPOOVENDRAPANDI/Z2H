@@ -4,7 +4,7 @@ from django.contrib.auth import (
 )
 from django.utils.translation import gettext as _
 from rest_framework import serializers
-from .models import RegisterUser, Z2HUser, Z2HCustomers
+from .models import RegisterUser, Z2HUser, Role
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -90,3 +90,8 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         email = str(validated_data['mobile_number']) + "@z2h.com"
         validated_data['user'] = Z2HUser.objects.filter(email=email).first()
         return super().create(validated_data)
+    
+class RoleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Role
+        fields = '__all__'

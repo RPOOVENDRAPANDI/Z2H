@@ -11,6 +11,8 @@ from .models import (
     Z2HOrders,
     Z2HOrderItems,
     Z2HAdvertisements,
+    Z2HWebPages,
+    Z2HWebPageRoles,
 )
 from apps.app.serializers import (
     Z2HPlanDetailsSerializer,
@@ -20,8 +22,11 @@ from apps.app.serializers import (
     Z2HOrderSerializer,
     Z2HOrderItemSerializer,
     Z2HAdvertisementsSerializer,
+    Z2HWebPageSerializer,
+    Z2HWebPageRolesSerializer,
 )
-from apps.user.models import Z2HCustomers, RegisterUser, Z2HUser
+from apps.user.serializers import RoleSerializer
+from apps.user.models import Z2HCustomers, RegisterUser, Z2HUser, Role
 from apps.app.permissions import CustomerExistsPermission
 from django.utils import timezone
 import os
@@ -315,3 +320,221 @@ class PostPaymentView(APIView):
             self.update_referrer_level(request)
 
         return Response(data=data, status=status.HTTP_200_OK)
+    
+class Z2HWebPagesView(ListAPIView):
+    queryset = Z2HWebPages.objects.all()
+    serializer_class = Z2HWebPageSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [authentication.TokenAuthentication]
+
+    def get(self, request, *args, **kwargs):
+        role = Role.objects.filter(login_mode='web')
+        data = {
+            "pages": self.get_serializer(self.get_queryset(), many=True).data,
+            "roles": RoleSerializer(role, many=True).data
+        }
+
+        return Response(data, status=status.HTTP_200_OK)
+    
+class SaveWebUserSettingsView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [authentication.TokenAuthentication]
+
+    def update_web_page_user(self, request_data, system_role_uid, users_page_uid):
+        web_page_role = None
+
+        if request_data['users'] == True:
+            user_web_page_exists = Z2HWebPageRoles.objects.filter(
+                role_uid=system_role_uid,
+                web_page_uid=users_page_uid
+            ).first()
+            if not user_web_page_exists:
+                web_page_role = Z2HWebPageRoles.objects.create(
+                    role_uid=system_role_uid,
+                    web_page_uid=users_page_uid
+                )
+            if user_web_page_exists:
+                user_web_page_exists.is_active = True
+                user_web_page_exists.save()
+
+        elif request_data['users'] == False:
+            web_page_role = Z2HWebPageRoles.objects.filter(
+                role_uid=system_role_uid,
+                web_page_uid=users_page_uid
+            ).first()
+            if web_page_role:
+                web_page_role.is_active = False
+
+        if web_page_role:
+            web_page_role.save()
+    
+    def update_web_page_products(self, request_data, system_role_uid, products_page_uid):
+        web_page_role = None
+
+        if request_data['products'] == True:
+            products_web_page_exists = Z2HWebPageRoles.objects.filter(
+                role_uid=system_role_uid,
+                web_page_uid=products_page_uid
+            ).first()
+            if not products_web_page_exists:
+                web_page_role = Z2HWebPageRoles.objects.create(
+                    role_uid=system_role_uid,
+                    web_page_uid=products_page_uid
+                )
+            if products_web_page_exists:
+                products_web_page_exists.is_active = True
+                products_web_page_exists.save()
+
+        elif request_data['products'] == False:
+            web_page_role = Z2HWebPageRoles.objects.filter(
+                role_uid=system_role_uid,
+                web_page_uid=products_page_uid
+            ).first()
+            if web_page_role:
+                web_page_role.is_active = False
+
+        if web_page_role:
+            web_page_role.save()
+    
+    def update_web_page_orders(self, request_data, system_role_uid, orders_page_uid):
+        web_page_role = None
+
+        if request_data['orders'] == True:
+            orders_web_page_exists = Z2HWebPageRoles.objects.filter(
+                role_uid=system_role_uid,
+                web_page_uid=orders_page_uid
+            ).first()
+            if not orders_web_page_exists:
+                web_page_role = Z2HWebPageRoles.objects.create(
+                    role_uid=system_role_uid,
+                    web_page_uid=orders_page_uid
+                )
+            if orders_web_page_exists:
+                orders_web_page_exists.is_active = True
+                orders_web_page_exists.save()
+
+        elif request_data['orders'] == False:
+            web_page_role = Z2HWebPageRoles.objects.filter(
+                role_uid=system_role_uid,
+                web_page_uid=orders_page_uid
+            ).first()
+            if web_page_role:
+                web_page_role.is_active = False
+
+        if web_page_role:
+            web_page_role.save()
+    
+    def update_web_page_customer(self, request_data, system_role_uid, customers_page_uid):
+        web_page_role = None
+
+        if request_data['customers'] == True:
+            customers_web_page_exists = Z2HWebPageRoles.objects.filter(
+                role_uid=system_role_uid,
+                web_page_uid=customers_page_uid
+            ).first()
+            if not customers_web_page_exists:
+                web_page_role = Z2HWebPageRoles.objects.create(
+                    role_uid=system_role_uid,
+                    web_page_uid=customers_page_uid
+                )
+            if customers_web_page_exists:
+                customers_web_page_exists.is_active = True
+                customers_web_page_exists.save()
+
+        elif request_data['customers'] == False:
+            web_page_role = Z2HWebPageRoles.objects.filter(
+                role_uid=system_role_uid,
+                web_page_uid=customers_page_uid
+            ).first()
+            if web_page_role:
+                web_page_role.is_active = False
+
+        if web_page_role:
+            web_page_role.save()
+    
+    def update_web_page_reports(self, request_data, system_role_uid, reports_page_uid):
+        web_page_role = None
+
+        if request_data['reports'] == True:
+            reports_web_page_exists = Z2HWebPageRoles.objects.filter(
+                role_uid=system_role_uid,
+                web_page_uid=reports_page_uid
+            ).first()
+            if not reports_web_page_exists:
+                web_page_role = Z2HWebPageRoles.objects.create(
+                    role_uid=system_role_uid,
+                    web_page_uid=reports_page_uid
+                )
+            if reports_web_page_exists:
+                reports_web_page_exists.is_active = True
+                reports_web_page_exists.save()
+
+        elif request_data['reports'] == False:
+            web_page_role = Z2HWebPageRoles.objects.filter(
+                role_uid=system_role_uid,
+                web_page_uid=reports_page_uid
+            ).first()
+            if web_page_role:
+                web_page_role.is_active = False
+
+        if web_page_role:
+            web_page_role.save()
+    
+    def update_web_page_settings(self, request_data, system_role_uid, settings_page_uid):
+        web_page_role = None
+
+        if request_data['settings'] == True:
+            settings_web_page_exists = Z2HWebPageRoles.objects.filter(
+                role_uid=system_role_uid,
+                web_page_uid=settings_page_uid
+            ).first()
+            if not settings_web_page_exists:
+                web_page_role = Z2HWebPageRoles.objects.create(
+                    role_uid=system_role_uid,
+                    web_page_uid=settings_page_uid
+                )
+            if settings_web_page_exists:
+                settings_web_page_exists.is_active = True
+                settings_web_page_exists.save()
+
+        elif request_data['settings'] == False:
+            web_page_role = Z2HWebPageRoles.objects.filter(
+                role_uid=system_role_uid,
+                web_page_uid=settings_page_uid
+            ).first()
+            if web_page_role:
+                web_page_role.is_active = False
+
+        if web_page_role:
+            web_page_role.save()
+
+    def post(self, request, *args, **kwargs):
+        data = {
+            'status': 'success',
+            'message': 'Data Saved Successfully!!!',
+        }
+
+        request_data = request.data
+
+        system_role_uid = request_data['systemRoleUid']
+        users_page = Z2HWebPages.objects.filter(name='users').first()
+        products_page = Z2HWebPages.objects.filter(name='products').first()
+        orders_page = Z2HWebPages.objects.filter(name='orders').first()
+        customers_page = Z2HWebPages.objects.filter(name='customers').first()
+        reports_page = Z2HWebPages.objects.filter(name='reports').first()
+        settings_page = Z2HWebPages.objects.filter(name='settings').first()
+
+        self.update_web_page_user(request_data, system_role_uid, users_page.uid)
+        self.update_web_page_products(request_data, system_role_uid, products_page.uid)
+        self.update_web_page_orders(request_data, system_role_uid, orders_page.uid)
+        self.update_web_page_customer(request_data, system_role_uid, customers_page.uid)
+        self.update_web_page_reports(request_data, system_role_uid, reports_page.uid)
+        self.update_web_page_settings(request_data, system_role_uid, settings_page.uid)
+
+        return Response(data=data, status=status.HTTP_200_OK)
+    
+class Z2HWebPageRolesView(ListAPIView):
+    queryset = Z2HWebPageRoles.objects.all()
+    serializer_class = Z2HWebPageRolesSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [authentication.TokenAuthentication]

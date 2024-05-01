@@ -4,6 +4,14 @@ from apps.user.models import Z2HUser
 
 # Create your models here.
 
+class Z2HWebPages(ZeroToHeroBaseModel):
+    name = models.CharField(max_length=64, null=False, blank=False)
+    description = models.TextField(null=True, blank=True)
+
+class Z2HWebPageRoles(ZeroToHeroBaseModel):
+    role_uid = models.CharField(max_length=64, null=False, blank=False)
+    web_page_uid = models.CharField(max_length=64, null=False, blank=False)
+
 class Z2HPlanDetails(ZeroToHeroBaseModel):
     name = models.CharField(max_length=64, null=True, blank=True)
     level_one_amount = models.DecimalField(max_digits=13, decimal_places=2, null=True, blank=True)

@@ -8,7 +8,10 @@ from .models import (
     Z2HOrders,
     Z2HOrderItems,
     Z2HAdvertisements,
+    Z2HWebPages,
+    Z2HWebPageRoles,
 )
+from apps.user.models import Role
 
 class Z2HPlanDetailsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -108,3 +111,22 @@ class Z2HAdvertisementsSerializer(serializers.ModelSerializer):
 
     def get_demo_urls(self, obj):
         return obj.data.get('demo_urls', [])
+    
+class Z2HWebPageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Z2HWebPages
+        fields = '__all__'
+
+class Z2HWebPageRolesSerializer(serializers.ModelSerializer):
+    role_name = serializers.SerializerMethodField()
+    web_page_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Z2HWebPageRoles
+        fields = ('uid', 'role_uid', 'web_page_uid', 'role_name', 'web_page_name', 'is_active')
+
+    def get_role_name(self, obj):
+        return Role.objects.filter(uid=obj.role_uid).first().name
+    
+    def get_web_page_name(self, obj):
+        return Z2HWebPages.objects.filter(uid=obj.web_page_uid).first().name

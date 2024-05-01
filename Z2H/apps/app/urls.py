@@ -27,5 +27,12 @@ urlpatterns = [
     ),
     path(
         r'update_payment/', views.PostPaymentView.as_view(), name="update_payment"
-    )
+    ),
+    path(
+        r'web_roles_and_pages/', views.Z2HWebPagesView.as_view(), name='web_roles_and_pages'
+    ),
+    path(
+        r'save_web_user_settings/', views.SaveWebUserSettingsView.as_view(), name='save_web_user_settings'
+    ),
+    path('web_user_role_page/', views.Z2HWebPageRolesView.as_view(), name='web_user_role_page'),
 ]
