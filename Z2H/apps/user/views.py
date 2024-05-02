@@ -259,7 +259,7 @@ class RegisterUserView(APIView):
             subject = "Zero To Hero Login Credentials"
             body = f"The System Generated Password for Zero To Hero Login of User '{request_data['name']}' is {password}"
             
-            # send_email(to_email=request_data['email_address'], body=body, subject=subject)
+            send_email(to_email=request_data['email_address'], body=body, subject=subject)
 
             return Response(data=data, status=status.HTTP_201_CREATED)
 
