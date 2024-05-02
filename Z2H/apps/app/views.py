@@ -315,13 +315,12 @@ class PostPaymentView(APIView):
 
         update_order_details = self.update_order_details(request, create_order)
 
-        user_customer = Z2HCustomers.objects.filter(user=request.user, is_level_four_completed=False).first()
-
-        data["customer_uid"] = str(user_customer.uid)
-
         if update_order_details:
             self.update_customer_details(request)
             self.update_referrer_level(request)
+
+        user_customer = Z2HCustomers.objects.filter(user=request.user, is_level_four_completed=False).first()
+        data["customer_uid"] = str(user_customer.uid)
 
         return Response(data=data, status=status.HTTP_200_OK)
     
