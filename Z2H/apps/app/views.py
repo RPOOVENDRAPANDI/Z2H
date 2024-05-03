@@ -2,6 +2,7 @@ from django.shortcuts import render
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
 from rest_framework import authentication, permissions, status
 from .models import (
     Z2HPlanDetails,
@@ -36,11 +37,12 @@ import os
 LOOKUP_REGEX = '[0-9a-f-]{36}'
 PRIMARY_LEG_COUNT = int(os.environ.get('PRIMARY_LEG_COUNT'))
 
-class Z2HPlanDetailsListView(ListAPIView):
+class Z2HPlanDetailsViewSet(ModelViewSet):
     queryset = Z2HPlanDetails.objects.all()
     serializer_class = Z2HPlanDetailsSerializer
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [authentication.TokenAuthentication]
+    lookup_field = 'uid'
 
 class Z2HProductCategoriesListView(ListAPIView):
     queryset = Z2HProductCategories.objects.all()

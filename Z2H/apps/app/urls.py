@@ -1,10 +1,14 @@
 from django.urls import path
 from apps.app import views
+from rest_framework.routers import DefaultRouter
 
 app_name = 'plan_details'
 
-urlpatterns = [
-    path('plan_details/', views.Z2HPlanDetailsListView.as_view(), name='plan_details'),
+router = DefaultRouter()
+router.register(r'plan_details', views.Z2HPlanDetailsViewSet, basename='plan_details')
+urlpatterns = router.urls
+
+urlpatterns += [
     path('product_categories/', views.Z2HProductCategoriesListView.as_view(), name='product_categories'),
     path(
         r'product_sub_categories/<str:product_category_uid>/', 
