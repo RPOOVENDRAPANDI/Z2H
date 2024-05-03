@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import authentication, permissions, status
+from rest_framework import filters
 from .models import (
     Z2HPlanDetails,
     Z2HProductCategories,
@@ -43,6 +44,9 @@ class Z2HPlanDetailsViewSet(ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [authentication.TokenAuthentication]
     lookup_field = 'uid'
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['id']
+    ordering = ['id']
 
 class Z2HProductCategoriesListView(ListAPIView):
     queryset = Z2HProductCategories.objects.all()
