@@ -1,10 +1,14 @@
 from django.urls import path
-from rest_framework import routers
+from rest_framework.routers import DefaultRouter
 from apps.user import views
 
 app_name = 'user'
 
-urlpatterns = [
+router = DefaultRouter()
+router.register('web_user', views.WebUserViewSet, basename='web_user')
+urlpatterns = router.urls
+
+urlpatterns += [
     path('create/', views.CreateUserView.as_view(), name='create'),
     path('login/', views.UserLoginView.as_view(), name="token"),
     path('logout/', views.UserLogoutView.as_view(), name="logout"),

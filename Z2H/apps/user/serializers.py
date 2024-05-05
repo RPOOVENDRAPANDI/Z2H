@@ -82,12 +82,26 @@ class UserPasswordUpdateSerializer(serializers.Serializer):
     )
     
 class RegisterUserSerializer(serializers.ModelSerializer):
+    system_email = serializers.SerializerMethodField()
+    system_role = serializers.SerializerMethodField()
+
     class Meta:
         model = RegisterUser
         fields = "__all__"
 
+    def get_system_email(self, obj):
+        return Z2HUser.objects.get(id=obj.user_id).email
+    
+    def get_system_role(self, obj):
+        return Role.objects.get(id=obj.role_id).name
+
     def create(self, validated_data):
-        email = str(validated_data['mobile_number']) + "@z2h.com"
+        request = self.context.get('request', None)
+        request_data = request.data
+        if request and request_data['accessed_from'] == 'web':
+            email = request_data['user_email']
+        else:
+            email = str(validated_data['mobile_number']) + "@z2h.com"
         validated_data['user'] = Z2HUser.objects.filter(email=email).first()
         return super().create(validated_data)
     

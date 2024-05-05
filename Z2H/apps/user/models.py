@@ -82,7 +82,7 @@ class RegisterUser(ZeroToHeroBaseModel):
         ('others', 'others'),
     )
 
-    referred_by = models.ForeignKey(Z2HCustomers, on_delete=models.PROTECT, related_name="users", null=False, blank=False)
+    referred_by = models.ForeignKey(Z2HCustomers, on_delete=models.PROTECT, related_name="users", null=True, blank=True)
     role = models.ForeignKey(Role, on_delete=models.PROTECT, related_name='users', null=False, blank=False)
     user = models.OneToOneField(Z2HUser, on_delete=models.PROTECT, related_name="user", null=True, blank=True)
     name = models.CharField(max_length=128, null=False, blank=False)
@@ -105,6 +105,7 @@ class RegisterUser(ZeroToHeroBaseModel):
     account_number = models.CharField(max_length=64, null=False, blank=False)
     profile_photo_path = models.CharField(max_length=256, null=True, blank=True)
     email_address = models.CharField(max_length=256, null=False, blank=False)
+    alternate_mobile_number = models.CharField(max_length=64, null=True, blank=True)
 
     def __str__(self):
         return self.name

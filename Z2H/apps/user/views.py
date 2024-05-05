@@ -13,10 +13,12 @@ from apps.user.serializers import (
     WebAuthTokenSerializer,
 )
 from apps.user.permissions import ReferrerLimitPermission
-from apps.user.models import Z2HUser, Z2HCustomers, Z2HUserRoles, Role
+from apps.user.models import Z2HUser, Z2HCustomers, Z2HUserRoles, Role, RegisterUser
 from apps.utils.tasks import send_email
 import random
 import string
+
+LOOKUP_REGEX = '[0-9a-f-]{36}'
 
 class CreateUserView(generics.CreateAPIView):
     """Create a new user in the system."""
@@ -296,3 +298,61 @@ class ValidateReferrerView(APIView):
         data["referrer_name"] = referrer_name
         
         return Response(data=data, status=status.HTTP_200_OK)
+
+class WebUserViewSet(viewsets.ModelViewSet):
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = RegisterUserSerializer
+    queryset = RegisterUser.objects.all()
+    lookup_field = 'uid'
+    lookup_url_kwarg = 'uid'
+    lookup_value_regex = LOOKUP_REGEX
+
+    def get_queryset(self):
+        return self.queryset.filter(is_active=True, role__login_mode='web')
+
+    def get_create_user(self, email, password, name):
+        data = {
+            'email': email,
+            'password': password,
+            'name': name,
+        }
+
+        user_serializer = UserSerializer(data=data)
+
+        if user_serializer.is_valid():
+            user_serializer.save()
+            return True
+        
+        return False
+
+    def generate_new_password(self, name, dob):
+        dob_replace = str(dob).replace('-', '')
+        return name.replace(" ", "").lower()[:4] + dob_replace
+
+    def create(self, request, *args, **kwargs):
+        data = {
+            'status': 'success',
+            'message': 'User Created Successfully!!!',
+        }
+
+        request_data = request.data
+
+        check_user_exists = Z2HUser.objects.filter(email=request_data['user_email']).exists()
+        if check_user_exists:
+            data['status'] = "user_exists"
+            data['message'] = "User Already Exists!!!"
+            return Response(data=data, status=status.HTTP_200_OK)
+
+        serializer = RegisterUserSerializer(data=request_data, context={'request': request})
+
+        if serializer.is_valid():
+            password = self.generate_new_password(request_data['name'], request_data['date_of_birth'])
+            create_user = self.get_create_user(request_data['user_email'], password, request_data['name'])
+            if create_user:
+                serializer.save()
+                return Response(data=data, status=status.HTTP_201_CREATED)
+
+        data['status'] = "error"
+        data['message'] = serializer.errors
+        return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
