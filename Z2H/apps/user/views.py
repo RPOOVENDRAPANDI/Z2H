@@ -11,6 +11,7 @@ from apps.user.serializers import (
     UserPasswordUpdateSerializer,
     UserListSerializer,
     WebAuthTokenSerializer,
+    CustomerSerializer,
 )
 from apps.user.permissions import ReferrerLimitPermission
 from apps.user.models import Z2HUser, Z2HCustomers, Z2HUserRoles, Role, RegisterUser
@@ -356,3 +357,21 @@ class WebUserViewSet(viewsets.ModelViewSet):
         data['status'] = "error"
         data['message'] = serializer.errors
         return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
+class CustomerViewSet(viewsets.ModelViewSet):
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = CustomerSerializer
+    queryset = Z2HCustomers.objects.all()
+    lookup_field = 'uid'
+    lookup_url_kwarg = 'uid'
+    lookup_value_regex = LOOKUP_REGEX
+
+    def get_queryset(self):
+        queryset = self.queryset.filter(is_active=True).order_by('id')
+        
+        first_record = queryset.first()
+        if first_record:
+            queryset = queryset.exclude(id=first_record.id)
+
+        return queryset

@@ -4,8 +4,11 @@ from django.contrib.auth import (
 )
 from django.utils.translation import gettext as _
 from rest_framework import serializers
-from .models import RegisterUser, Z2HUser, Role
+from .models import RegisterUser, Z2HUser, Role, Z2HCustomers
+from apps.app.models import Z2HPlanDetails
+import os
 
+PRIMARY_LEG_COUNT = int(os.environ.get('PRIMARY_LEG_COUNT'))
 
 class UserSerializer(serializers.ModelSerializer):
 
@@ -109,3 +112,54 @@ class RoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Role
         fields = '__all__'
+
+class CustomerSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source='user.name')
+    date_of_birth = serializers.SerializerMethodField()
+    gender = serializers.SerializerMethodField()
+    mobile_number = serializers.SerializerMethodField()
+    plan = serializers.SerializerMethodField()
+    level_one_count = serializers.SerializerMethodField()
+    level_two_count = serializers.SerializerMethodField()
+    level_three_count = serializers.SerializerMethodField()
+    level_four_count = serializers.SerializerMethodField()
+    plan_start_date = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Z2HCustomers
+        fields = '__all__'
+    
+    def get_date_of_birth(self, obj):
+        return RegisterUser.objects.get(user_id=obj.user_id).date_of_birth
+    
+    def get_gender(self, obj):
+        return RegisterUser.objects.get(user_id=obj.user_id).gender
+    
+    def get_mobile_number(self, obj):
+        return RegisterUser.objects.get(user_id=obj.user_id).mobile_number
+    
+    def get_email_address(self, obj):
+        return RegisterUser.objects.get(user_id=obj.user_id).email_address
+    
+    def get_plan(self, obj):
+        return Z2HPlanDetails.objects.filter(uid=obj.active_plan_uid).first().name
+    
+    def get_plan_start_date(self, obj):
+        return str(obj.plan_start_date).split(" ")[0]
+    
+    def get_level_one_count(self, obj):
+        count = Z2HCustomers.objects.filter(referrer=obj).count()
+        return f"{count} / {PRIMARY_LEG_COUNT}"
+    
+    def get_level_two_count(self, obj):
+        count = 0
+        return f"{count} / {PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT}"
+    
+    def get_level_three_count(self, obj):
+        count = 0
+        return f"{count} / {PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT}"
+    
+    def get_level_four_count(self, obj):
+        count = 0
+        return f"{count} / {PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT}"
+    
