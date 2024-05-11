@@ -109,6 +109,14 @@ class Z2HOrdersListView(ListAPIView):
         }
 
         return Response(data, status=status.HTTP_200_OK)
+
+class Z2HOrdersViewSet(ModelViewSet):
+    queryset = Z2HOrders.objects.all()
+    serializer_class = Z2HOrderSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [authentication.TokenAuthentication]
+    lookup_field = 'uid'
+    
     
 class Z2HAdVideosView(ListAPIView):
     queryset = Z2HAdvertisements.objects.all()

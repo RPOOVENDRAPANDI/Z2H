@@ -6,6 +6,7 @@ app_name = 'plan_details'
 
 router = DefaultRouter()
 router.register(r'plan_details', views.Z2HPlanDetailsViewSet, basename='plan_details')
+router.register(r'orders', views.Z2HOrdersViewSet, basename='orders')
 urlpatterns = router.urls
 
 urlpatterns += [

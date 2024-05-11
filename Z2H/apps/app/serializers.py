@@ -11,7 +11,8 @@ from .models import (
     Z2HWebPages,
     Z2HWebPageRoles,
 )
-from apps.user.models import Role
+from apps.user.models import Role, RegisterUser
+from datetime import datetime
 
 class Z2HPlanDetailsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -52,6 +53,7 @@ class Z2HProductSerializer(serializers.ModelSerializer):
     
 class Z2HOrderSerializer(serializers.ModelSerializer):
     order_id = serializers.CharField(source='uid')
+    order_date = serializers.SerializerMethodField()
     delivery_through = serializers.SerializerMethodField()
     delivery_number = serializers.SerializerMethodField()
     delivery_address = serializers.SerializerMethodField()
@@ -59,35 +61,71 @@ class Z2HOrderSerializer(serializers.ModelSerializer):
     payment_status = serializers.SerializerMethodField()
     payment_date = serializers.SerializerMethodField()
     payment_reference = serializers.SerializerMethodField()
+    customer_name = serializers.SerializerMethodField()
+    mobile_number = serializers.SerializerMethodField()
+    order_igst_amount = serializers.SerializerMethodField()
+    order_status = serializers.SerializerMethodField()
 
     class Meta:
         model = Z2HOrders
         fields = (
             'order_id', 'order_date', 'order_cgst_amount', 'order_sgst_amount', 'order_igst_amount', 'order_gst_total_amount',
             'order_total_amount', 'order_status', 'delivery_date', 'delivery_through', 'delivery_number', 'delivery_address',
-            'payment_mode', 'payment_status', 'payment_date', 'payment_reference',
+            'payment_mode', 'payment_status', 'payment_date', 'payment_reference', 'customer_name', 'mobile_number',
         )
 
     def get_delivery_through(self, obj):
+        if not obj.delivery_details:
+            return None
         return obj.delivery_details.get('delivery_through', None)
     
     def get_delivery_number(self, obj):
+        if not obj.delivery_details:
+            return None
         return obj.delivery_details.get('delivery_number', None)
     
     def get_delivery_address(self, obj):
+        if not obj.delivery_details:
+            return None
         return obj.delivery_details.get('delivery_address', None)
     
     def get_payment_mode(self, obj):
+        if not obj.payment_details:
+            return None
         return obj.payment_details.get('payment_mode', None)
     
     def get_payment_status(self, obj):
+        if not obj.payment_details:
+            return None
         return obj.payment_details.get('payment_status', None)
     
     def get_payment_date(self, obj):
-        return obj.payment_details.get('payment_date', None)
+        if not obj.payment_details:
+            return None
+        return (
+            datetime.strptime(obj.payment_details['payment_date'], "%Y-%m-%d %H:%M:%S.%f%z").strftime("%d-%m-%Y") \
+                if obj.payment_details.get('payment_date', None) else None
+        )
     
     def get_payment_reference(self, obj):
+        if not obj.payment_details:
+            return None
         return obj.payment_details.get('payment_reference', None)
+    
+    def get_customer_name(self, obj):
+        return obj.ordered_by.name
+    
+    def get_mobile_number(self, obj):
+        return RegisterUser.objects.filter(user=obj.ordered_by).first().mobile_number
+    
+    def get_order_igst_amount(self, obj):
+        return obj.order_igst_amount if obj.order_igst_amount else 0.00
+    
+    def get_order_date(self, obj):
+        return obj.order_date.strftime("%d-%m-%Y") if obj.order_date else None
+    
+    def get_order_status(self, obj):
+        return obj.order_status.capitalize() if obj.order_status else None
     
 class Z2HOrderItemSerializer(serializers.ModelSerializer):
     product_id = serializers.CharField(source='product.uid')

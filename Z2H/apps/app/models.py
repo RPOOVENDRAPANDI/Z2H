@@ -56,8 +56,7 @@ class Z2HOrders(ZeroToHeroBaseModel):
         ('customer', 'customer'),
     )
     ORDER_STATUS_CHOICES = (
-        ('pending', 'Added to cart waiting for customer confirmation'),
-        ('yet_to_be_couriered', 'Confimed by customer - Payment done- Waiting for dispatch by company'),
+        ('pending', 'Confimed by customer - Payment done- Waiting for dispatch by company'),
         ('couriered', 'Couriered by company'),
         ('delivered', 'Delivered'),
         ('cancelled', 'Cancelled'),
