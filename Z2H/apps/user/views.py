@@ -21,6 +21,22 @@ import string
 
 LOOKUP_REGEX = '[0-9a-f-]{36}'
 
+def generate_password(length=8):
+    letters = string.ascii_letters
+    digits = string.digits
+    special_chars = string.punctuation
+
+    password = ''.join(random.choices(letters, k=length-2))
+    password += random.choice(letters.upper())
+    password += random.choice(digits)
+    password += random.choice(special_chars)
+
+    password_list = list(password)
+    random.shuffle(password_list)
+    password = ''.join(password_list)
+
+    return password
+
 class CreateUserView(generics.CreateAPIView):
     """Create a new user in the system."""
     serializer_class = UserSerializer
@@ -169,22 +185,6 @@ class RegisterUserView(APIView):
     authentication_classes = []
     permission_classes = [ReferrerLimitPermission, ]
 
-    def generate_password(self, length=8):
-        letters = string.ascii_letters
-        digits = string.digits
-        special_chars = string.punctuation
-
-        password = ''.join(random.choices(letters, k=length-2))
-        password += random.choice(letters.upper())
-        password += random.choice(digits)
-        password += random.choice(special_chars)
-
-        password_list = list(password)
-        random.shuffle(password_list)
-        password = ''.join(password_list)
-
-        return password
-
     def get_create_new_user(self, request_data):
         mobile_number = request_data.get('mobile_number')
         name = request_data.get('name')
@@ -195,7 +195,7 @@ class RegisterUserView(APIView):
         if check_user_exists:
             return "user_exists"
 
-        password = self.generate_password()
+        password = generate_password()
 
         data = {
             'email': email,
@@ -298,6 +298,56 @@ class ValidateReferrerView(APIView):
         referrer_name = referred_by.user.name
         data["referrer_name"] = referrer_name
         
+        return Response(data=data, status=status.HTTP_200_OK)
+    
+class ForgotPasswordView(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request, *args, **kwargs):
+        email_address = request.query_params.get('email_address', None)
+        mobile_number = request.query_params.get('mobile_number', None)
+
+        data = {
+            'status': 'success',
+            'message': 'Email Sent Successfully!!!',
+        }
+
+        if not email_address:
+            data['status'] = 'error'
+            data ['message'] = 'Email Address is required!!!'
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+        
+        if not mobile_number:
+            data['status'] = 'error'
+            data ['message'] = 'Mobile Number is required!!!'
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
+        register_user = RegisterUser.objects.filter(email_address=email_address, mobile_number=mobile_number)
+        if not register_user.exists():
+            data['status'] = 'error'
+            data['message'] = 'User Not Found!!!'
+            return Response(data=data, status=status.HTTP_404_NOT_FOUND)
+        
+        user = register_user.first().user
+        new_password = generate_password()
+
+        data = {
+            'password': new_password
+        }
+
+        serialier = UserPasswordUpdateSerializer(data=data)
+
+        if serialier.is_valid():
+            user.set_password(new_password)
+            user.save()
+        
+        subject = "Zero To Hero Reset Password"
+
+        body = f"The Updated Password for Zero To Hero Login of User '{register_user.first().name}' is {new_password}"
+            
+        send_email(to_email=email_address, body=body, subject=subject)
+
         return Response(data=data, status=status.HTTP_200_OK)
 
 class WebUserViewSet(viewsets.ModelViewSet):

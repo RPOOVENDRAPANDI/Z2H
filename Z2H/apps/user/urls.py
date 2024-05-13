@@ -19,4 +19,5 @@ urlpatterns += [
     path('users_list/', views.ListUsersView.as_view(), name="users-list"),
     path('validate_referrer/', views.ValidateReferrerView.as_view(), name="validate-referrer"),
     path('info/', views.GetUserInfoView.as_view(), name='user-info'),
+    path('forgot_password/', views.ForgotPasswordView.as_view(), name='forgot-password'),
 ]
