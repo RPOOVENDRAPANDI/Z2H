@@ -18,6 +18,18 @@ class Z2HPlanDetails(ZeroToHeroBaseModel):
     level_two_amount = models.DecimalField(max_digits=13, decimal_places=2, null=True, blank=True)
     level_three_amount = models.DecimalField(max_digits=13, decimal_places=2, null=True, blank=True)
     level_four_amount = models.DecimalField(max_digits=13, decimal_places=2, null=True, blank=True)
+    is_level_one_flat = models.BooleanField(default=True)
+    is_level_one_percentage = models.BooleanField(default=False)
+    level_one_percentage_value = models.DecimalField(max_digits=13, decimal_places=2, null=True, blank=True)
+    is_level_two_flat = models.BooleanField(default=True)
+    is_level_two_percentage = models.BooleanField(default=False)
+    level_two_percentage_value = models.DecimalField(max_digits=13, decimal_places=2, null=True, blank=True)
+    is_level_three_flat = models.BooleanField(default=True)
+    is_level_three_percentage = models.BooleanField(default=False)
+    level_three_percentage_value = models.DecimalField(max_digits=13, decimal_places=2, null=True, blank=True)
+    is_level_four_flat = models.BooleanField(default=True)
+    is_level_four_percentage = models.BooleanField(default=False)
+    level_four_percentage_value = models.DecimalField(max_digits=13, decimal_places=2, null=True, blank=True)
     registration_fee = models.DecimalField(max_digits=13, decimal_places=2, null=True, blank=True)
 
 class Z2HAdvertisements(ZeroToHeroBaseModel):

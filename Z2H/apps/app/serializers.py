@@ -17,10 +17,7 @@ from datetime import datetime
 class Z2HPlanDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Z2HPlanDetails
-        fields = (
-            'id', 'is_active', 'uid', 'name', 'level_one_amount', 'level_two_amount', 'level_three_amount', 'level_four_amount',
-            'registration_fee',
-        )
+        fields = '__all__'
 
 class Z2HProductCategoriesSerializer(serializers.ModelSerializer):
     class Meta:
