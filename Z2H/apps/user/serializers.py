@@ -100,7 +100,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         request = self.context.get('request', None)
-        request_data = request.data
+        request_data = request.data if request else None
         if request and request_data['accessed_from'] == 'web':
             email = request_data['user_email']
         else:
