@@ -51,6 +51,8 @@ class Z2HProductSerializer(serializers.ModelSerializer):
 class Z2HOrderSerializer(serializers.ModelSerializer):
     order_id = serializers.CharField(source='uid')
     order_date = serializers.SerializerMethodField()
+    courier_date = serializers.SerializerMethodField()
+    delivery_date = serializers.SerializerMethodField()
     delivery_through = serializers.SerializerMethodField()
     delivery_number = serializers.SerializerMethodField()
     delivery_address = serializers.SerializerMethodField()
@@ -69,6 +71,7 @@ class Z2HOrderSerializer(serializers.ModelSerializer):
             'order_id', 'order_date', 'order_cgst_amount', 'order_sgst_amount', 'order_igst_amount', 'order_gst_total_amount',
             'order_total_amount', 'order_status', 'delivery_date', 'delivery_through', 'delivery_number', 'delivery_address',
             'payment_mode', 'payment_status', 'payment_date', 'payment_reference', 'customer_name', 'mobile_number',
+            'courier_date', 'delivery_date',
         )
 
     def get_delivery_through(self, obj):
@@ -120,6 +123,12 @@ class Z2HOrderSerializer(serializers.ModelSerializer):
     
     def get_order_date(self, obj):
         return obj.order_date.strftime("%d-%m-%Y") if obj.order_date else None
+    
+    def get_courier_date(self, obj):
+        return obj.courier_date.strftime("%d-%m-%Y") if obj.courier_date else None
+    
+    def get_delivery_date(self, obj):
+        return obj.delivery_date.strftime("%d-%m-%Y") if obj.delivery_date else None
     
     def get_order_status(self, obj):
         return obj.order_status.capitalize() if obj.order_status else None

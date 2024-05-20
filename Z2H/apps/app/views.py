@@ -116,7 +116,32 @@ class Z2HOrdersViewSet(ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [authentication.TokenAuthentication]
     lookup_field = 'uid'
-    
+
+    def get_queryset(self):
+        from_date = self.request.query_params.get('fromDate', None)
+        to_date = self.request.query_params.get('toDate', None)
+        order_status = self.request.query_params.get('orderStatus', None)
+
+        if order_status:
+            order_status = order_status.lower()
+
+        if from_date and to_date:
+            return self.queryset.filter(order_date__range=[from_date, to_date], order_status=order_status)
+        
+        return self.queryset.filter(order_status=order_status)
+
+    def partial_update(self, request, *args, **kwargs):
+        Z2HOrders.objects.filter(uid=kwargs['uid']).update(
+            delivery_date=request.data['delivery_date'],
+            delivery_details=request.data['delivery_details'],
+            order_status=request.data['order_status'],
+            courier_date=request.data['courier_date'],
+        )
+        data = {
+            "status": "success",
+            "message": "Order updated successfully"
+        }
+        return Response(data, status=status.HTTP_200_OK)
     
 class Z2HAdVideosView(ListAPIView):
     queryset = Z2HAdvertisements.objects.all()
