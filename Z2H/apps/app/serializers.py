@@ -64,6 +64,7 @@ class Z2HOrderSerializer(serializers.ModelSerializer):
     mobile_number = serializers.SerializerMethodField()
     order_igst_amount = serializers.SerializerMethodField()
     order_status = serializers.SerializerMethodField()
+    order_items = serializers.SerializerMethodField()
 
     class Meta:
         model = Z2HOrders
@@ -71,7 +72,7 @@ class Z2HOrderSerializer(serializers.ModelSerializer):
             'order_id', 'order_date', 'order_cgst_amount', 'order_sgst_amount', 'order_igst_amount', 'order_gst_total_amount',
             'order_total_amount', 'order_status', 'delivery_date', 'delivery_through', 'delivery_number', 'delivery_address',
             'payment_mode', 'payment_status', 'payment_date', 'payment_reference', 'customer_name', 'mobile_number',
-            'courier_date', 'delivery_date',
+            'courier_date', 'delivery_date', 'order_items',
         )
 
     def get_delivery_through(self, obj):
@@ -133,15 +134,19 @@ class Z2HOrderSerializer(serializers.ModelSerializer):
     def get_order_status(self, obj):
         return obj.order_status.capitalize() if obj.order_status else None
     
+    def get_order_items(self, obj):
+        return Z2HOrderItemSerializer(Z2HOrderItems.objects.filter(order=obj), many=True).data
+    
 class Z2HOrderItemSerializer(serializers.ModelSerializer):
     product_id = serializers.CharField(source='product.uid')
     product_name = serializers.CharField(source='product.name')
+    order_uid = serializers.CharField(source='order.uid')
 
     class Meta:
         model = Z2HOrderItems
         fields = (
             'product_id', 'product_name', 'quantity', 'hsn_code', 'price', 'cgst_percentage', 'cgst_amount', 'sgst_percentage',
-            'sgst_amount', 'igst_percentage', 'igst_amount', 'gst_total_amount', 'total_amount'
+            'sgst_amount', 'igst_percentage', 'igst_amount', 'gst_total_amount', 'total_amount', 'uid', 'order_uid'
         )
 
 class Z2HAdvertisementsSerializer(serializers.ModelSerializer):

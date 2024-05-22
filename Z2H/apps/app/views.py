@@ -244,7 +244,7 @@ class PostPaymentView(APIView):
     
     def update_customer_details(self, request):
         register_user = RegisterUser.objects.filter(user=request.user).first()
-        active_plan = Z2HPlanDetails.objects.get(name='SILVER')
+        active_plan = Z2HPlanDetails.objects.get(name='Silver')
 
         Z2HCustomers.objects.create(
             user=request.user,
@@ -254,76 +254,133 @@ class PostPaymentView(APIView):
         )
 
         return True
-    
-    # def update_referrer_level_one(self, z2hcustomer_referrer, z2hcustomers_under_referrer):
-    #     if z2hcustomers_under_referrer.count() == PRIMARY_LEG_COUNT:
-    #         z2hcustomer_referrer.is_level_one_completed = True
-    #         z2hcustomer_referrer.save()
-
-    #     return True
-    
-    # def update_referrer_level_two(self, z2hcustomer_referrer, z2hcustomers_under_referrer):
-    #     print("Test")
-    #     SECONDARY_LEG_COUNT = PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT
-
-    #     z2hcustomers_count = 0
-    #     for level_one_customer in z2hcustomers_under_referrer:
-    #         z2hcustomers_count += Z2HCustomers.objects.filter(referrer=level_one_customer).count()
-
-    #     if z2hcustomers_count == SECONDARY_LEG_COUNT:
-    #         z2hcustomer_referrer.is_level_two_completed = True
-    #         z2hcustomer_referrer.save()
-        
-    #     return True
-    
-    # def update_referrer_level_three(self, z2hcustomer_referrer, z2hcustomers_under_referrer):
-    #     THIRD_LEG_COUNT = PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT
-
-    #     z2hcustomers_count = 0
-    #     for level_one_customer in z2hcustomers_under_referrer:
-    #         for level_two_customer in Z2HCustomers.objects.filter(referrer=level_one_customer):
-    #             z2hcustomers_count += Z2HCustomers.objects.filter(referrer=level_two_customer).count()
-
-    #     if z2hcustomers_count == THIRD_LEG_COUNT:
-    #         z2hcustomer_referrer.is_level_three_completed = True
-    #         z2hcustomer_referrer.save()
-
-    #     return True
-    
-    # def update_referrer_level_four(self, z2hcustomer_referrer, z2hcustomers_under_referrer):
-    #     FOURTH_LEG_COUNT = PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT
-
-    #     z2hcustomers_count = 0
-    #     for level_one_customer in z2hcustomers_under_referrer:
-    #         for level_two_customer in Z2HCustomers.objects.filter(referrer=level_one_customer):
-    #             for level_three_customer in Z2HCustomers.objects.filter(referrer=level_two_customer):
-    #                 z2hcustomers_count += Z2HCustomers.objects.filter(referrer=level_three_customer).count()
-
-    #     if z2hcustomers_count == FOURTH_LEG_COUNT:
-    #         z2hcustomer_referrer.is_level_four_completed = True
-    #         z2hcustomer_referrer.save()
-        
-    #     return True
         
     def update_referrer_level(self, request):
-        z2hcustomer = Z2HCustomers.objects.filter(user=request.user, is_level_four_completed=False)
-
-        referrer = z2hcustomer.first().referrer
-
-        z2hcustomer_referrer = Z2HCustomers.objects.filter(id=referrer.id).first()
-        admin_user = Z2HUser.objects.filter(is_superuser=True).first()
-
-        z2hcustomers_under_referrer = Z2HCustomers.objects.filter(
-            referrer=z2hcustomer_referrer
-        ).exclude(
-            user__id=admin_user.id
+        z2hcustomer = Z2HCustomers.objects.filter(
+            user=request.user,
+            is_level_one_completed=False,
+            is_level_two_completed=False,
+            is_level_three_completed=False,
+            is_level_four_completed=False
         )
 
-        if not z2hcustomer_referrer.is_level_one_completed:
-            if z2hcustomers_under_referrer.count() == PRIMARY_LEG_COUNT:
-                z2hcustomer_referrer.is_level_one_completed = True
-                z2hcustomer_referrer.save()
+        referrer_level_one = None
+        referrer_level_two = None
+        referrer_level_three = None
+        referrer_level_four = None
+        referrer_final_level = None
 
+        referrer_level_one = z2hcustomer.first().referrer
+        is_referrer_first_admin = referrer_level_one.is_admin_user
+
+        if is_referrer_first_admin:
+            referrer_final_level = referrer_level_one
+        
+        z2hcustomer_referrer_first = Z2HCustomers.objects.filter(id=referrer_level_one.id).first()
+
+        z2hcustomers_under_referrer_first = Z2HCustomers.objects.filter(
+            referrer=z2hcustomer_referrer_first
+        ).exclude(
+            is_admin_user=True
+        )
+
+        if not z2hcustomer_referrer_first.is_level_one_completed:
+            if z2hcustomers_under_referrer_first.count() == PRIMARY_LEG_COUNT:
+                z2hcustomer_referrer_first.is_level_one_completed = True
+                z2hcustomer_referrer_first.save()
+        
+        if referrer_level_one == referrer_final_level:
+            return True
+
+        ################## SECOND #######################
+        
+        referrer_level_two = Z2HCustomers.objects.filter(id=referrer_level_one.id).first().referrer
+        is_referrer_second_admin = referrer_level_two.is_admin_user
+
+        if is_referrer_second_admin:
+            referrer_final_level = referrer_level_two
+        
+        # For Second Above Leg
+        z2hcustomer_referrer_second = Z2HCustomers.objects.filter(id=referrer_level_two.id).first()
+
+        # Taking the referrers under second leg
+        z2hcustomer_under_referrer_second = Z2HCustomers.objects.filter(
+            referrer=z2hcustomer_referrer_second
+        ).exclude(
+            is_admin_user=True
+        )
+
+        # Getting the count of customers under these referrers to update is_level_two_completed of referrer
+        secondary_leg_count = 0
+        for customer in z2hcustomer_under_referrer_second:
+            secondary_leg_count += Z2HCustomers.objects.filter(referrer=customer).exclude(is_admin_user=True).count()
+
+        if secondary_leg_count == PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT:
+            z2hcustomer_referrer_second.is_level_two_completed = True
+            z2hcustomer_referrer_second.save()
+
+        if referrer_level_two == referrer_final_level:
+            return True
+
+        ################## THIRD #######################
+
+        referrer_level_three = Z2HCustomers.objects.filter(id=referrer_level_two.id).first().referrer
+        is_referrer_third_admin = referrer_level_three.is_admin_user
+
+        if is_referrer_third_admin:
+            referrer_final_level = referrer_level_three
+
+        # For Third Above Leg
+        z2hcustomer_referrer_third = Z2HCustomers.objects.filter(id=referrer_level_three.id).exclude(
+            is_admin_user=True
+        ).first()
+
+        # Taking the referrers under third leg
+        z2hcustomer_under_referrer_third = Z2HCustomers.objects.filter(
+            referrer=z2hcustomer_referrer_third
+        ).exclude(
+            is_admin_user=True
+        )
+
+        # Getting the count of customers under these referrers to update is_level_three_completed of referrer
+        third_leg_count = 0
+        for customer in z2hcustomer_under_referrer_third:
+            third_leg_count += Z2HCustomers.objects.filter(referrer=customer).exclude(
+                is_admin_user=True
+            ).count()
+
+        if third_leg_count == PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT:
+            z2hcustomer_referrer_third.is_level_three_completed = True
+            z2hcustomer_referrer_third.save()
+
+        if referrer_level_three == referrer_final_level:
+            return True
+        
+        ################## FOURTH #######################
+        referrer_level_four = Z2HCustomers.objects.filter(id=referrer_level_three.id).first().referrer
+
+        # For Fourth Above Leg
+        z2hcustomer_referrer_fourth = Z2HCustomers.objects.filter(id=referrer_level_four.id).first()
+
+        # Taking the referrers under fouth leg
+        z2hcustomer_under_referrer_fourth = Z2HCustomers.objects.filter(
+            referrer=z2hcustomer_referrer_fourth
+        ).exclude(
+            is_admin_user=True
+        )
+
+        # Getting the count of customers under these referrers to update is_level_four_completed of referrer
+        fourth_leg_count = 0
+        for customer in z2hcustomer_under_referrer_fourth:
+            fourth_leg_count += Z2HCustomers.objects.filter(referrer=customer).exclude(
+                is_admin_user=True
+            ).count()
+        
+        if fourth_leg_count == PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT:
+            z2hcustomer_referrer_fourth.is_level_four_completed = True
+            z2hcustomer_referrer_fourth.save()
+
+        
     def post(self, request, *args, **kwargs):
         data = {
             'status': 'success',

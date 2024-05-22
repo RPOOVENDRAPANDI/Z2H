@@ -69,6 +69,7 @@ class Z2HCustomers(ZeroToHeroBaseModel):
     is_level_two_completed = models.BooleanField(default=False)
     is_level_three_completed = models.BooleanField(default=False)
     is_level_four_completed = models.BooleanField(default=False)
+    is_admin_user = models.BooleanField(default=False)
 
 class RegisterUser(ZeroToHeroBaseModel):
 
