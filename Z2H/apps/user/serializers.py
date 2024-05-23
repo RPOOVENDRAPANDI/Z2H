@@ -9,6 +9,9 @@ from apps.app.models import Z2HPlanDetails
 import os
 
 PRIMARY_LEG_COUNT = int(os.environ.get('PRIMARY_LEG_COUNT'))
+SECONDARY_LEG_COUNT = PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT
+TERTIARY_LEG_COUNT = SECONDARY_LEG_COUNT * PRIMARY_LEG_COUNT
+QUATERNARY_LEG_COUNT = TERTIARY_LEG_COUNT * PRIMARY_LEG_COUNT
 
 class UserSerializer(serializers.ModelSerializer):
 
@@ -153,13 +156,31 @@ class CustomerSerializer(serializers.ModelSerializer):
     
     def get_level_two_count(self, obj):
         count = 0
-        return f"{count} / {PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT}"
+        customers = Z2HCustomers.objects.filter(referrer=obj)
+        for customer in customers:
+            count += Z2HCustomers.objects.filter(referrer=customer).count()
+
+        return f"{count} / {SECONDARY_LEG_COUNT}"
     
     def get_level_three_count(self, obj):
         count = 0
-        return f"{count} / {PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT}"
+        customers = Z2HCustomers.objects.filter(referrer=obj)
+        for first_level_customer in customers:
+            customers_next_level = Z2HCustomers.objects.filter(referrer=first_level_customer)
+            for customer in customers_next_level:
+                count += Z2HCustomers.objects.filter(referrer=customer).count()
+
+        return f"{count} / {TERTIARY_LEG_COUNT}"
     
     def get_level_four_count(self, obj):
         count = 0
-        return f"{count} / {PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT}"
+        customers = Z2HCustomers.objects.filter(referrer=obj)
+        for first_level_customer in customers:
+            customers_next_level = Z2HCustomers.objects.filter(referrer=first_level_customer)
+            for second_level_customer in customers_next_level:
+                customers_next_level = Z2HCustomers.objects.filter(referrer=second_level_customer)
+                for customer in customers_next_level:
+                    count += Z2HCustomers.objects.filter(referrer=customer).count()
+
+        return f"{count} / {QUATERNARY_LEG_COUNT}"
     

@@ -37,6 +37,9 @@ import os
 
 LOOKUP_REGEX = '[0-9a-f-]{36}'
 PRIMARY_LEG_COUNT = int(os.environ.get('PRIMARY_LEG_COUNT'))
+SECONDARY_LEG_COUNT = PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT
+TERTIARY_LEG_COUNT = SECONDARY_LEG_COUNT * PRIMARY_LEG_COUNT
+QUATERNARY_LEG_COUNT = TERTIARY_LEG_COUNT * PRIMARY_LEG_COUNT
 
 class Z2HPlanDetailsViewSet(ModelViewSet):
     queryset = Z2HPlanDetails.objects.all()
@@ -315,7 +318,7 @@ class PostPaymentView(APIView):
         for customer in z2hcustomer_under_referrer_second:
             secondary_leg_count += Z2HCustomers.objects.filter(referrer=customer).exclude(is_admin_user=True).count()
 
-        if secondary_leg_count == PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT:
+        if secondary_leg_count == SECONDARY_LEG_COUNT:
             z2hcustomer_referrer_second.is_level_two_completed = True
             z2hcustomer_referrer_second.save()
 
@@ -331,9 +334,7 @@ class PostPaymentView(APIView):
             referrer_final_level = referrer_level_three
 
         # For Third Above Leg
-        z2hcustomer_referrer_third = Z2HCustomers.objects.filter(id=referrer_level_three.id).exclude(
-            is_admin_user=True
-        ).first()
+        z2hcustomer_referrer_third = Z2HCustomers.objects.filter(id=referrer_level_three.id).first()
 
         # Taking the referrers under third leg
         z2hcustomer_under_referrer_third = Z2HCustomers.objects.filter(
@@ -344,12 +345,13 @@ class PostPaymentView(APIView):
 
         # Getting the count of customers under these referrers to update is_level_three_completed of referrer
         third_leg_count = 0
-        for customer in z2hcustomer_under_referrer_third:
-            third_leg_count += Z2HCustomers.objects.filter(referrer=customer).exclude(
-                is_admin_user=True
-            ).count()
+        for third_level_customer in z2hcustomer_under_referrer_third:
+            for customer in Z2HCustomers.objects.filter(referrer=third_level_customer).exclude(is_admin_user=True):
+                third_leg_count += Z2HCustomers.objects.filter(referrer=customer).exclude(
+                    is_admin_user=True
+                ).count()
 
-        if third_leg_count == PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT:
+        if third_leg_count == TERTIARY_LEG_COUNT:
             z2hcustomer_referrer_third.is_level_three_completed = True
             z2hcustomer_referrer_third.save()
 
@@ -371,12 +373,14 @@ class PostPaymentView(APIView):
 
         # Getting the count of customers under these referrers to update is_level_four_completed of referrer
         fourth_leg_count = 0
-        for customer in z2hcustomer_under_referrer_fourth:
-            fourth_leg_count += Z2HCustomers.objects.filter(referrer=customer).exclude(
-                is_admin_user=True
-            ).count()
+        for fourth_level_customer in z2hcustomer_under_referrer_fourth:
+            for third_level_customer in Z2HCustomers.objects.filter(referrer=fourth_level_customer).exclude(is_admin_user=True):
+                for customer in Z2HCustomers.objects.filter(referrer=third_level_customer).exclude(is_admin_user=True):
+                    fourth_leg_count += Z2HCustomers.objects.filter(referrer=customer).exclude(
+                        is_admin_user=True
+                    ).count()
         
-        if fourth_leg_count == PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT:
+        if fourth_leg_count == QUATERNARY_LEG_COUNT:
             z2hcustomer_referrer_fourth.is_level_four_completed = True
             z2hcustomer_referrer_fourth.save()
 
