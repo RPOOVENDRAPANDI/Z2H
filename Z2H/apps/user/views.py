@@ -12,12 +12,14 @@ from apps.user.serializers import (
     UserListSerializer,
     WebAuthTokenSerializer,
     CustomerSerializer,
+    UpdateRegisterUserDetailsSerializer,
 )
 from apps.user.permissions import ReferrerLimitPermission
 from apps.user.models import Z2HUser, Z2HCustomers, Z2HUserRoles, Role, RegisterUser
 from apps.utils.tasks import send_email
 import random
 import string
+from rest_framework.decorators import action
 
 LOOKUP_REGEX = '[0-9a-f-]{36}'
 
@@ -122,16 +124,6 @@ class GetUserInfoView(APIView):
     authentication_classes = [authentication.TokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request, *args, **kwargs):
-        data = {
-            'status': 'success',
-            'message': 'User Infomation!!!',
-        }
-        user = request.user
-        user_info = self.get_user_info(user)
-        data['user_info'] = user_info
-        return Response(data, status=status.HTTP_200_OK)
-
     def get_user_info(self, user):
         user_role = Z2HUserRoles.objects.filter(user_uid=str(user.uid)).first()
         role = Role.objects.filter(uid=user_role.role_uid).first()
@@ -144,6 +136,74 @@ class GetUserInfoView(APIView):
         }
 
         return user_info
+    
+    def get_user_info_for_mobile(self, request):
+        data = {
+            'status': 'success',
+            'message': 'User Infomation!!!',
+        }
+        
+        user = RegisterUser.objects.filter(user=request.user).first()
+
+        if not user:
+            data['status'] = 'error'
+            data['message'] = 'User Not Found'
+            return Response(data, status=status.HTTP_200_OK)
+
+        customer = Z2HCustomers.objects.filter(id=user.referred_by.id).first()
+
+        referrer = RegisterUser.objects.filter(user=customer.user).first()
+        
+        user_info = {
+            'registered_date': user.created,
+            'name': user.name,
+            'nominee_name': user.nominee_name,
+            'date_of_birth': user.date_of_birth,
+            'marital_status': user.marital_status,
+            'gender': user.gender,
+            'aadhar_number': user.aadhar_number,
+            'pan': user.pan,
+            'mobile_number': user.mobile_number,
+            'city': user.city,
+            'town': user.town,
+            'address': user.address,
+            'pin_code': user.pin_code,
+            'name_of_bank': user.name_of_bank,
+            'name_as_in_bank': user.name_as_in_bank,
+            'ifsc_code': user.ifsc_code,
+            'bank_branch': user.bank_branch,
+            'account_number': user.account_number,
+            'email_address': user.email_address,
+            'district': user.district.name,
+            'state': user.district.state.name,
+            'referrer_uid': customer.uid,
+            'referrer_name': referrer.name,
+            'referrer_city': referrer.city,
+            'referrer_town': referrer.town,
+            'referrer_mobile_number': referrer.mobile_number,
+        }
+
+        data['user_info'] = user_info
+
+        return Response(data, status=status.HTTP_200_OK)
+
+    def get(self, request, *args, **kwargs):
+        accessed_from = request.GET.get('accessed_from', None)
+
+        if not accessed_from:
+            return Response({'status': 'error', 'message': 'Accessed From is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if accessed_from == 'mobile':
+            return self.get_user_info_for_mobile(request)
+
+        data = {
+            'status': 'success',
+            'message': 'User Infomation!!!',
+        }
+        user = request.user
+        user_info = self.get_user_info(user)
+        data['user_info'] = user_info
+        return Response(data, status=status.HTTP_200_OK)
     
 class UserLogoutView(APIView):
     authentication_classes = [authentication.TokenAuthentication]
@@ -262,10 +322,32 @@ class RegisterUserView(APIView):
             subject = "Zero To Hero Login Credentials"
             body = f"The System Generated Password for Zero To Hero Login of User '{request_data['name']}' is {password}"
             
-            # send_email(to_email=request_data['email_address'], body=body, subject=subject)
+            send_email(to_email=request_data['email_address'], body=body, subject=subject)
 
             return Response(data=data, status=status.HTTP_201_CREATED)
 
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class UpdateRegisterUderDetailsView(APIView):
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        request_data = request.data
+
+        register_user = RegisterUser.objects.filter(user=request.user).first()
+
+        serializer = UpdateRegisterUserDetailsSerializer(register_user, data=request_data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            data = {
+                "status": "Success",
+                "message": "User Details Updated Successfully!!!",
+                "data": serializer.data,
+            }
+            return Response(data=data, status=status.HTTP_200_OK)
+        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class ValidateReferrerView(APIView):
@@ -425,3 +507,38 @@ class CustomerViewSet(viewsets.ModelViewSet):
             queryset = queryset.exclude(id=first_record.id)
 
         return queryset
+
+    @action(detail=False, methods=['GET', ], url_path='customer_details', url_name='customer-details')
+    def get_customer_details(self, request, *args, **kwargs):
+        customer_uid = request.query_params.get('customer_uid', None)
+
+        if not customer_uid:
+            data = {
+                "status": "Error",
+                "message": "Customer UID is required!!!"
+            }
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
+        customer = Z2HCustomers.objects.filter(uid=customer_uid).first()
+
+        first_level_customers = Z2HCustomers.objects.filter(referrer=customer)
+        first_level_customers_data = CustomerSerializer(first_level_customers, many=True).data
+
+        second_level_customers = Z2HCustomers.objects.filter(referrer__in=first_level_customers)
+        second_level_customers_data = CustomerSerializer(second_level_customers, many=True).data
+
+        third_level_customers = Z2HCustomers.objects.filter(referrer__in=second_level_customers)
+        third_level_customers_data = CustomerSerializer(third_level_customers, many=True).data
+
+        fourth_level_customers = Z2HCustomers.objects.filter(referrer__in=third_level_customers)
+        fourth_level_customers_data = CustomerSerializer(fourth_level_customers, many=True).data
+
+        data = {
+            "customer": CustomerSerializer(customer).data,
+            "first_level_customers": first_level_customers_data,
+            "second_level_customers": second_level_customers_data,
+            "third_level_customers": third_level_customers_data,
+            "fourth_level_customers": fourth_level_customers_data,
+        }
+
+        return Response(data=data, status=status.HTTP_200_OK)

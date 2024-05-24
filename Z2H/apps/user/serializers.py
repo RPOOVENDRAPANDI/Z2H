@@ -111,6 +111,14 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         validated_data['user'] = Z2HUser.objects.filter(email=email).first()
         return super().create(validated_data)
     
+class UpdateRegisterUserDetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RegisterUser
+        fields = [
+            'address', 'marital_status', 'pan', 'aadhar_number', 'district', 'city', 'town', 'address', 'pin_code',
+            'name_of_bank', 'name_as_in_bank', 'ifsc_code', 'bank_branch', 'account_number', 'alternate_mobile_number'
+        ]
+    
 class RoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Role

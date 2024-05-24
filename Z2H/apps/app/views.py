@@ -290,6 +290,7 @@ class PostPaymentView(APIView):
         if not z2hcustomer_referrer_first.is_level_one_completed:
             if z2hcustomers_under_referrer_first.count() == PRIMARY_LEG_COUNT:
                 z2hcustomer_referrer_first.is_level_one_completed = True
+                z2hcustomer_referrer_first.level_one_completed_date = timezone.now()
                 z2hcustomer_referrer_first.save()
         
         if referrer_level_one == referrer_final_level:
@@ -320,6 +321,7 @@ class PostPaymentView(APIView):
 
         if secondary_leg_count == SECONDARY_LEG_COUNT:
             z2hcustomer_referrer_second.is_level_two_completed = True
+            z2hcustomer_referrer_second.level_two_completed_date = timezone.now()
             z2hcustomer_referrer_second.save()
 
         if referrer_level_two == referrer_final_level:
@@ -353,6 +355,7 @@ class PostPaymentView(APIView):
 
         if third_leg_count == TERTIARY_LEG_COUNT:
             z2hcustomer_referrer_third.is_level_three_completed = True
+            z2hcustomer_referrer_third.level_three_completed_date = timezone.now()
             z2hcustomer_referrer_third.save()
 
         if referrer_level_three == referrer_final_level:
@@ -382,6 +385,7 @@ class PostPaymentView(APIView):
         
         if fourth_leg_count == QUATERNARY_LEG_COUNT:
             z2hcustomer_referrer_fourth.is_level_four_completed = True
+            z2hcustomer_referrer_fourth.level_four_completed_date = timezone.now()
             z2hcustomer_referrer_fourth.save()
 
         

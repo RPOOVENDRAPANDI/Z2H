@@ -70,12 +70,26 @@ class Z2HCustomers(ZeroToHeroBaseModel):
     is_level_three_completed = models.BooleanField(default=False)
     is_level_four_completed = models.BooleanField(default=False)
     is_admin_user = models.BooleanField(default=False)
+    is_level_one_commission_paid = models.BooleanField(default=False)
+    is_level_two_commission_paid = models.BooleanField(default=False)
+    is_level_three_commission_paid = models.BooleanField(default=False)
+    is_level_four_commission_paid = models.BooleanField(default=False)
+    level_one_completed_date = models.DateTimeField(null=True, blank=True)
+    level_two_completed_date = models.DateTimeField(null=True, blank=True)
+    level_three_completed_date = models.DateTimeField(null=True, blank=True)
+    level_four_completed_date = models.DateTimeField(null=True, blank=True)
+    level_one_commission_details = models.JSONField(default=dict)
+    level_two_commission_details = models.JSONField(default=dict)
+    level_three_commission_details = models.JSONField(default=dict)
+    level_four_commission_details = models.JSONField(default=dict)
 
 class RegisterUser(ZeroToHeroBaseModel):
 
     MARITAL_CHOICES = (
         ('single', 'single'),
         ('married', 'married'),
+        ('divorced', 'divorced'),
+        ('widowed', 'widowed'),
     )
     GENDER_CHOICES = (
         ('male', 'male'),
