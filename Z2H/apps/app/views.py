@@ -386,6 +386,7 @@ class PostPaymentView(APIView):
         if fourth_leg_count == QUATERNARY_LEG_COUNT:
             z2hcustomer_referrer_fourth.is_level_four_completed = True
             z2hcustomer_referrer_fourth.level_four_completed_date = timezone.now()
+            z2hcustomer_referrer_fourth.plan_end_date = timezone.now()
             z2hcustomer_referrer_fourth.save()
 
         
