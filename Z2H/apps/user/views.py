@@ -205,7 +205,7 @@ class GetUserInfoView(APIView):
             'profile_photo_path': user.profile_photo_path,
             'enable_payment': enable_payment,
             "is_existing_user": is_existing_user,
-            "user_customer_uid": user_customer.uid,
+            "user_customer_uid": user_customer.uid if user_customer else None,
         }
 
         data['user_info'] = user_info
