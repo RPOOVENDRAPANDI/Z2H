@@ -116,7 +116,8 @@ class UpdateRegisterUserDetailsSerializer(serializers.ModelSerializer):
         model = RegisterUser
         fields = [
             'address', 'marital_status', 'pan', 'aadhar_number', 'district', 'city', 'town', 'address', 'pin_code',
-            'name_of_bank', 'name_as_in_bank', 'ifsc_code', 'bank_branch', 'account_number', 'alternate_mobile_number'
+            'name_of_bank', 'name_as_in_bank', 'ifsc_code', 'bank_branch', 'account_number', 'alternate_mobile_number',
+            'profile_photo_path',
         ]
     
 class RoleSerializer(serializers.ModelSerializer):

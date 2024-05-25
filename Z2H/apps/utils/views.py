@@ -59,7 +59,6 @@ class UploadImageView(APIView):
             if not os.path.exists(file_uplaod_path):
                 os.makedirs(file_uplaod_path)
 
-
             with open(file_to_upload, "wb") as destination:
                 for chunk in request.FILES["file_name"].chunks():
                     destination.write(chunk)

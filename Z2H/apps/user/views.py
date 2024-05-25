@@ -137,6 +137,23 @@ class GetUserInfoView(APIView):
 
         return user_info
     
+    def get_check_user(self, request):
+        enable_payment = False
+        is_existing_user = False
+        customer = Z2HCustomers.objects.filter(user=request.user).first()
+
+        if not customer:
+            enable_payment = True
+
+        if customer:
+            is_existing_user = True
+        
+        if customer and customer.is_level_one_completed and customer.is_level_two_completed \
+            and customer.is_level_three_completed and customer.is_level_four_completed:
+            enable_payment = True
+
+        return enable_payment, is_existing_user
+    
     def get_user_info_for_mobile(self, request):
         data = {
             'status': 'success',
@@ -153,6 +170,10 @@ class GetUserInfoView(APIView):
         customer = Z2HCustomers.objects.filter(id=user.referred_by.id).first()
 
         referrer = RegisterUser.objects.filter(user=customer.user).first()
+
+        user_customer = Z2HCustomers.objects.filter(user=request.user).first()
+
+        enable_payment, is_existing_user = self.get_check_user(request)
         
         user_info = {
             'registered_date': user.created,
@@ -181,6 +202,10 @@ class GetUserInfoView(APIView):
             'referrer_city': referrer.city,
             'referrer_town': referrer.town,
             'referrer_mobile_number': referrer.mobile_number,
+            'profile_photo_path': user.profile_photo_path,
+            'enable_payment': enable_payment,
+            "is_existing_user": is_existing_user,
+            "user_customer_uid": user_customer.uid,
         }
 
         data['user_info'] = user_info
@@ -377,8 +402,13 @@ class ValidateReferrerView(APIView):
             "message": "Referrer Found!!!"
         }
 
+        register_user = RegisterUser.objects.filter(user=referred_by.user).first()
+
         referrer_name = referred_by.user.name
+        referrer_city = register_user.city
+
         data["referrer_name"] = referrer_name
+        data["referrer_city"] = referrer_city
         
         return Response(data=data, status=status.HTTP_200_OK)
     
