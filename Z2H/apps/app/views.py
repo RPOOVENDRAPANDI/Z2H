@@ -32,6 +32,7 @@ from apps.user.models import Z2HCustomers, RegisterUser, Z2HUser, Role
 from apps.app.permissions import CustomerExistsPermission
 from django.utils import timezone
 import os
+from datetime import datetime
 
 # Create your views here.
 
@@ -134,16 +135,26 @@ class Z2HOrdersViewSet(ModelViewSet):
         return self.queryset.filter(order_status=order_status)
 
     def partial_update(self, request, *args, **kwargs):
+        orders = Z2HOrders.objects.filter(uid=kwargs['uid']).first()
+
+        data = {
+            "status": "success",
+            "message": "Order updated successfully"
+        }
+
+        if orders.order_status == 'pending':
+            orders.courier_date = request.data['courier_date']
+            orders.delivery_details = request.data['delivery_details']
+            orders.order_status = request.data['order_status']
+            orders.save()
+            return Response(data, status=status.HTTP_200_OK)
+
         Z2HOrders.objects.filter(uid=kwargs['uid']).update(
             delivery_date=request.data['delivery_date'],
             delivery_details=request.data['delivery_details'],
             order_status=request.data['order_status'],
             courier_date=request.data['courier_date'],
         )
-        data = {
-            "status": "success",
-            "message": "Order updated successfully"
-        }
         return Response(data, status=status.HTTP_200_OK)
     
 class Z2HAdVideosView(ListAPIView):
