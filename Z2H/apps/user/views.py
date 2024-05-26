@@ -16,6 +16,7 @@ from apps.user.serializers import (
 )
 from apps.user.permissions import ReferrerLimitPermission
 from apps.user.models import Z2HUser, Z2HCustomers, Z2HUserRoles, Role, RegisterUser
+from apps.app.models import Z2HWebPages, Z2HWebPageRoles
 from apps.utils.tasks import send_email
 import random
 import string
@@ -127,12 +128,15 @@ class GetUserInfoView(APIView):
     def get_user_info(self, user):
         user_role = Z2HUserRoles.objects.filter(user_uid=str(user.uid)).first()
         role = Role.objects.filter(uid=user_role.role_uid).first()
+        web_page_roles = Z2HWebPageRoles.objects.filter(role_uid=role.uid, is_active=True)
+        web_pages = Z2HWebPages.objects.filter(uid__in=[web_page_role.web_page_uid for web_page_role in web_page_roles])
 
         user_info = {
             'uid': user.uid,
             'name': user.name,
             'email': user.email,
             'role': role.name,
+            'web_pages': [web_page.name for web_page in web_pages],
         }
 
         return user_info
@@ -492,6 +496,15 @@ class WebUserViewSet(viewsets.ModelViewSet):
     def generate_new_password(self, name, dob):
         dob_replace = str(dob).replace('-', '')
         return name.replace(" ", "").lower()[:4] + dob_replace
+    
+    def get_update_user_role(self, email):
+        user = Z2HUser.objects.filter(email=email).first()
+        register_user = RegisterUser.objects.filter(user=user).first()
+        role = Role.objects.filter(id=register_user.role.id).first()
+
+        Z2HUserRoles.objects.create(user_uid=user.uid, role_uid=role.uid)
+
+        return True
 
     def create(self, request, *args, **kwargs):
         data = {
@@ -514,6 +527,7 @@ class WebUserViewSet(viewsets.ModelViewSet):
             create_user = self.get_create_user(request_data['user_email'], password, request_data['name'])
             if create_user:
                 serializer.save()
+                self.get_update_user_role(request_data['user_email'])
                 return Response(data=data, status=status.HTTP_201_CREATED)
 
         data['status'] = "error"
