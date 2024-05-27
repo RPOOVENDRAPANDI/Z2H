@@ -5,13 +5,18 @@ from django.contrib.auth import (
 from django.utils.translation import gettext as _
 from rest_framework import serializers
 from .models import RegisterUser, Z2HUser, Role, Z2HCustomers
-from apps.app.models import Z2HPlanDetails
+from apps.app.models import Z2HPlanDetails, Z2HOrders
+from apps.app.serializers import Z2HOrderSerializer
 import os
 
 PRIMARY_LEG_COUNT = int(os.environ.get('PRIMARY_LEG_COUNT'))
 SECONDARY_LEG_COUNT = PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT
 TERTIARY_LEG_COUNT = SECONDARY_LEG_COUNT * PRIMARY_LEG_COUNT
 QUATERNARY_LEG_COUNT = TERTIARY_LEG_COUNT * PRIMARY_LEG_COUNT
+INPROGRESS = 'In Progress'
+COMPLETED = 'Completed'
+PAID = 'Paid'
+UNPAID = 'Unpaid'
 
 class UserSerializer(serializers.ModelSerializer):
 
@@ -129,26 +134,98 @@ class CustomerSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='user.name')
     date_of_birth = serializers.SerializerMethodField()
     gender = serializers.SerializerMethodField()
+    marital_status = serializers.SerializerMethodField()
     mobile_number = serializers.SerializerMethodField()
+    aadhar_number = serializers.SerializerMethodField()
+    pan = serializers.SerializerMethodField()
+    city = serializers.SerializerMethodField()
+    town = serializers.SerializerMethodField()
+    address = serializers.SerializerMethodField()
+    pin_code = serializers.SerializerMethodField()
+    name_of_bank = serializers.SerializerMethodField()
+    name_as_in_bank = serializers.SerializerMethodField()
+    ifsc_code = serializers.SerializerMethodField()
+    bank_branch = serializers.SerializerMethodField()
+    account_number = serializers.SerializerMethodField()
     plan = serializers.SerializerMethodField()
     level_one_count = serializers.SerializerMethodField()
     level_two_count = serializers.SerializerMethodField()
     level_three_count = serializers.SerializerMethodField()
     level_four_count = serializers.SerializerMethodField()
     plan_start_date = serializers.SerializerMethodField()
+    referrer_name = serializers.SerializerMethodField()
+    referrer_id = serializers.SerializerMethodField()
+    level_one_completed = serializers.SerializerMethodField()
+    level_two_completed = serializers.SerializerMethodField()
+    level_three_completed = serializers.SerializerMethodField()
+    level_four_completed = serializers.SerializerMethodField()
+    level_one_completed_date = serializers.SerializerMethodField()
+    level_two_completed_date = serializers.SerializerMethodField()
+    level_three_completed_date = serializers.SerializerMethodField()
+    level_one_commission_status = serializers.SerializerMethodField()
+    level_two_commission_status = serializers.SerializerMethodField()
+    level_three_commission_status = serializers.SerializerMethodField()
+    level_four_commission_status = serializers.SerializerMethodField()
+    order_details = serializers.SerializerMethodField()
 
     class Meta:
         model = Z2HCustomers
-        fields = '__all__'
+        fields = [
+            'uid', 'name', 'date_of_birth', 'gender', 'marital_status', 'mobile_number', 'aadhar_number', 'pan',
+            'city', 'town', 'address', 'pin_code', 'name_of_bank', 'name_as_in_bank', 'ifsc_code', 'bank_branch',
+            'account_number', 'plan', 'level_one_count', 'level_two_count', 'level_three_count', 'level_four_count',
+            'plan_start_date', 'referrer_name', 'referrer_id', 'level_one_completed', 'level_two_completed',
+            'level_three_completed', 'level_four_completed', 'level_one_completed_date', 'level_two_completed_date',
+            'level_three_completed_date', 'level_four_completed_date', 'level_one_commission_status', 'level_two_commission_status',
+            'level_three_commission_status', 'level_four_commission_status', 'order_details',
+        ]
     
     def get_date_of_birth(self, obj):
         return RegisterUser.objects.get(user_id=obj.user_id).date_of_birth
     
     def get_gender(self, obj):
-        return RegisterUser.objects.get(user_id=obj.user_id).gender
+        return RegisterUser.objects.get(user_id=obj.user_id).gender.capitalize()
+    
+    def get_marital_status(self, obj):
+        return RegisterUser.objects.get(user_id=obj.user_id).marital_status.capitalize()
     
     def get_mobile_number(self, obj):
         return RegisterUser.objects.get(user_id=obj.user_id).mobile_number
+    
+    def get_aadhar_number(self, obj):
+        return RegisterUser.objects.get(user_id=obj.user_id).aadhar_number
+    
+    def get_pan(self, obj):
+        pan = RegisterUser.objects.get(user_id=obj.user_id).pan
+        return pan.upper() if pan else ""
+    
+    def get_city(self, obj):
+        return RegisterUser.objects.get(user_id=obj.user_id).city
+    
+    def get_town(self, obj):
+        return RegisterUser.objects.get(user_id=obj.user_id).town
+    
+    def get_address(self, obj):
+        return RegisterUser.objects.get(user_id=obj.user_id).address
+    
+    def get_pin_code(self, obj):
+        return RegisterUser.objects.get(user_id=obj.user_id).pin_code
+    
+    def get_name_of_bank(self, obj):
+        return RegisterUser.objects.get(user_id=obj.user_id).name_of_bank
+    
+    def get_name_as_in_bank(self, obj):
+        return RegisterUser.objects.get(user_id=obj.user_id).name_as_in_bank
+    
+    def get_ifsc_code(self, obj):
+        ifsc_code = RegisterUser.objects.get(user_id=obj.user_id).ifsc_code
+        return ifsc_code.upper() if ifsc_code else ""
+    
+    def get_bank_branch(self, obj):
+        return RegisterUser.objects.get(user_id=obj.user_id).bank_branch
+    
+    def get_account_number(self, obj):
+        return RegisterUser.objects.get(user_id=obj.user_id).account_number
     
     def get_email_address(self, obj):
         return RegisterUser.objects.get(user_id=obj.user_id).email_address
@@ -157,7 +234,7 @@ class CustomerSerializer(serializers.ModelSerializer):
         return Z2HPlanDetails.objects.filter(uid=obj.active_plan_uid).first().name
     
     def get_plan_start_date(self, obj):
-        return str(obj.plan_start_date).split(" ")[0]
+        return obj.plan_start_date.strftime("%d-%m-%Y") if obj.plan_start_date else None
     
     def get_level_one_count(self, obj):
         count = Z2HCustomers.objects.filter(referrer=obj).count()
@@ -192,4 +269,79 @@ class CustomerSerializer(serializers.ModelSerializer):
                     count += Z2HCustomers.objects.filter(referrer=customer).count()
 
         return f"{count} / {QUATERNARY_LEG_COUNT}"
+    
+    def get_referrer_name(self, obj):
+        return obj.referrer.user.name if obj.referrer else ""
+    
+    def get_referrer_id(self, obj):
+        referrer = obj.referrer
+        customer = Z2HCustomers.objects.filter(user_id=referrer.user).first()
+        return customer.customer_number
+    
+    def get_level_one_completed(self, obj):
+        if obj.is_level_one_completed:
+            return COMPLETED
+
+        return INPROGRESS
+    
+    def get_level_two_completed(self, obj):
+        if obj.is_level_two_completed:
+            return COMPLETED
+        
+        return INPROGRESS
+    
+    def get_level_three_completed(self, obj):
+        if obj.is_level_three_completed:
+            return COMPLETED
+        
+        return INPROGRESS
+    
+    def get_level_four_completed(self, obj):
+        if obj.is_level_four_completed:
+            return COMPLETED
+        
+        return INPROGRESS
+    
+    def get_level_one_completed_date(self, obj):
+        return obj.level_one_completed_date.strftime("%d-%m-%Y") if obj.level_one_completed_date else None
+    
+    def get_level_two_completed_date(self, obj):
+        return obj.level_two_completed_date.strftime("%d-%m-%Y") if obj.level_two_completed_date else None
+    
+    def get_level_three_completed_date(self, obj):
+        return obj.level_three_completed_date.strftime("%d-%m-%Y") if obj.level_three_completed_date else None
+    
+    def get_level_four_completed_date(self, obj):
+        return obj.level_four_completed_date.strftime("%d-%m-%Y") if obj.level_four_completed_date else None
+    
+    def get_level_one_commission_status(self, obj):
+        if obj.is_level_one_commission_paid:
+            return PAID
+        
+        return UNPAID
+    
+    def get_level_two_commission_status(self, obj):
+        if obj.is_level_two_commission_paid:
+            return PAID
+
+        return UNPAID
+    
+    def get_level_three_commission_status(self, obj):
+        if obj.is_level_three_commission_paid:
+            return PAID
+        
+        return UNPAID
+    
+    def get_level_four_commission_status(self, obj):
+        if obj.is_level_four_commission_paid:
+            return PAID
+        
+        return UNPAID
+    
+    def get_order_details(self, obj):
+        orders = Z2HOrders.objects.filter(customer=obj)
+        return Z2HOrderSerializer(orders, many=True).data
+    
+    
+
     

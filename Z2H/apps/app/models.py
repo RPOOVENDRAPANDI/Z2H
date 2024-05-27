@@ -1,6 +1,6 @@
 from django.db import models
 from apps.utils.models import ZeroToHeroBaseModel
-from apps.user.models import Z2HUser
+from apps.user.models import Z2HUser, Z2HCustomers
 
 # Create your models here.
 
@@ -79,6 +79,8 @@ class Z2HOrders(ZeroToHeroBaseModel):
     )
 
     ordered_by = models.ForeignKey(Z2HUser, on_delete=models.CASCADE, null=True, blank=True)
+    customer = models.ForeignKey(Z2HCustomers, on_delete=models.CASCADE, null=True, blank=True)
+    order_number = models.CharField(max_length=64, null=True, blank=True)
     order_date = models.DateTimeField(null=True, blank=True)
     order_cgst_amount = models.DecimalField(max_digits=13, decimal_places=2, null=True, blank=True)
     order_sgst_amount = models.DecimalField(max_digits=13, decimal_places=2, null=True, blank=True)

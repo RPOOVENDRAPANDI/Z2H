@@ -28,11 +28,11 @@ from apps.app.serializers import (
     Z2HWebPageRolesSerializer,
 )
 from apps.user.serializers import RoleSerializer
-from apps.user.models import Z2HCustomers, RegisterUser, Z2HUser, Role
+from apps.user.models import Z2HCustomers, RegisterUser, Role
 from apps.app.permissions import CustomerExistsPermission
+from apps.utils.models import Z2HSettings
 from django.utils import timezone
 import os
-from datetime import datetime
 
 # Create your views here.
 
@@ -186,6 +186,17 @@ class PostPaymentView(APIView):
             "payment_reference": request_data['payment_reference']
         }
 
+        settings_order_number_text = Z2HSettings.objects.filter(name='order_number_text', is_active=True).first()
+        order_number_text = settings_order_number_text.value
+
+        settings_order_number_sequence = Z2HSettings.objects.filter(name="order_number_sequence", is_active=True).first()
+        order_number_value = int(settings_order_number_sequence.value)
+
+        settings_order_number_sequence.value = str(order_number_value + 1)
+        settings_order_number_sequence.save()
+
+        order_number = order_number_text + str(order_number_value)
+
         z2h_orders = Z2HOrders.objects.create(
             ordered_by=request.user,
             order_date=timezone.now(),
@@ -197,6 +208,8 @@ class PostPaymentView(APIView):
             delivery_date=None,
             delivery_details=None,
             payment_details=payment_details,
+            courier_date=None,
+            order_number=order_number,
         )
 
         return z2h_orders
@@ -256,15 +269,31 @@ class PostPaymentView(APIView):
 
         return True
     
-    def update_customer_details(self, request):
+    def update_customer_details(self, request, order):
         register_user = RegisterUser.objects.filter(user=request.user).first()
         active_plan = Z2HPlanDetails.objects.get(name='Silver')
 
-        Z2HCustomers.objects.create(
+        settings_customer_number_text = Z2HSettings.objects.filter(name='customer_number_text', is_active=True).first()
+        customer_number_text = settings_customer_number_text.value
+
+        settings_customer_number_sequence = Z2HSettings.objects.filter(name='customer_number_value', is_active=True).first()
+        customer_number_sequence = int(settings_customer_number_sequence.value)
+
+        settings_customer_number_sequence.value = str(customer_number_sequence + 1)
+        settings_customer_number_sequence.save()
+
+        customer_number = customer_number_text + str(customer_number_sequence)
+
+        customer = Z2HCustomers.objects.create(
             user=request.user,
             referrer=register_user.referred_by,
             active_plan_uid=active_plan.uid,
             plan_start_date=timezone.now(),
+            customer_number=customer_number,
+        )
+
+        Z2HOrders.objects.filter(uid=order.uid).update(
+            customer=customer
         )
 
         return True
@@ -422,7 +451,7 @@ class PostPaymentView(APIView):
             data['status'] = 'error'
             data['message'] = 'Payment Failed!!!'
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-        
+
         create_order = self.create_order(request, request_data)
         create_order.save()
 
@@ -432,11 +461,11 @@ class PostPaymentView(APIView):
         update_order_details = self.update_order_details(request, create_order)
 
         if update_order_details:
-            self.update_customer_details(request)
+            self.update_customer_details(request, create_order)
             self.update_referrer_level(request)
-
+        
         user_customer = Z2HCustomers.objects.filter(user=request.user, is_level_four_completed=False).first()
-        data["customer_uid"] = str(user_customer.uid)
+        data["customer_uid"] = str(user_customer.customer_number)
 
         return Response(data=data, status=status.HTTP_200_OK)
     

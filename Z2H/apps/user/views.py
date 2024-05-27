@@ -201,7 +201,7 @@ class GetUserInfoView(APIView):
             'email_address': user.email_address,
             'district': user.district.name,
             'state': user.district.state.name,
-            'referrer_uid': customer.uid,
+            'referrer_uid': customer.customer_number,
             'referrer_name': referrer.name,
             'referrer_city': referrer.city,
             'referrer_town': referrer.town,
@@ -305,7 +305,7 @@ class RegisterUserView(APIView):
     def post(self, request, *args, **kwargs):
         request_data = request.data
 
-        referred_by = Z2HCustomers.objects.filter(uid=request_data.get('referred_by')).first()
+        referred_by = Z2HCustomers.objects.filter(customer_number=request_data.get('referred_by')).first()
 
         if not referred_by:
             data = {
@@ -393,7 +393,7 @@ class ValidateReferrerView(APIView):
             }
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
         
-        referred_by = Z2HCustomers.objects.filter(uid=referrer_uid).first()
+        referred_by = Z2HCustomers.objects.filter(customer_number=referrer_uid).first()
         if not referred_by:
             data = {
                 "status": "Error",

@@ -49,7 +49,7 @@ class Z2HProductSerializer(serializers.ModelSerializer):
         return [image.product_image_url for image in Z2HProductImages.objects.filter(product=obj, is_active=True)]
     
 class Z2HOrderSerializer(serializers.ModelSerializer):
-    order_id = serializers.CharField(source='uid')
+    order_id = serializers.CharField(source='order_number')
     order_date = serializers.SerializerMethodField()
     courier_date = serializers.SerializerMethodField()
     delivery_date = serializers.SerializerMethodField()

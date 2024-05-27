@@ -62,6 +62,7 @@ class Z2HUser(AbstractBaseUser, PermissionsMixin, ZeroToHeroBaseModel):
 class Z2HCustomers(ZeroToHeroBaseModel):
     user = models.ForeignKey(Z2HUser, on_delete=models.PROTECT, related_name="users", null=False, blank=False)
     referrer = models.ForeignKey("self", on_delete=models.SET_NULL, related_name="customer", null=True, blank=True)
+    customer_number = models.CharField(max_length=64, null=False, blank=False)
     active_plan_uid = models.CharField(max_length=64, null=False, blank=False)
     plan_start_date = models.DateTimeField(null=False, blank=False)
     plan_end_date = models.DateTimeField(null=True, blank=True)

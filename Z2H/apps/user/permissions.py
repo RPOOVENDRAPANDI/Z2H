@@ -1,5 +1,5 @@
 from rest_framework import permissions
-from .models import RegisterUser
+from .models import RegisterUser, Z2HCustomers
 import uuid
 import os
 
@@ -11,9 +11,9 @@ class ReferrerLimitPermission(permissions.BasePermission):
         referred_by = request.data.get('referred_by', None)
         if not referred_by:
             return False
-        try:
-            uuid.UUID(referred_by, version=4)
-        except ValueError:
+        
+        customer = Z2HCustomers.objects.filter(customer_number=referred_by).first()
+        if not customer:
             return False
         
-        return RegisterUser.objects.filter(referred_by__uid=referred_by).count() < int(os.environ["PRIMARY_LEG_COUNT"])
+        return RegisterUser.objects.filter(referred_by=customer.referrer).count() < int(os.environ["PRIMARY_LEG_COUNT"])
