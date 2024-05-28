@@ -136,10 +136,13 @@ class CustomerSerializer(serializers.ModelSerializer):
     gender = serializers.SerializerMethodField()
     marital_status = serializers.SerializerMethodField()
     mobile_number = serializers.SerializerMethodField()
+    nominee_name = serializers.SerializerMethodField()
     aadhar_number = serializers.SerializerMethodField()
     pan = serializers.SerializerMethodField()
     city = serializers.SerializerMethodField()
     town = serializers.SerializerMethodField()
+    district = serializers.SerializerMethodField()
+    state = serializers.SerializerMethodField()
     address = serializers.SerializerMethodField()
     pin_code = serializers.SerializerMethodField()
     name_of_bank = serializers.SerializerMethodField()
@@ -167,6 +170,7 @@ class CustomerSerializer(serializers.ModelSerializer):
     level_three_commission_status = serializers.SerializerMethodField()
     level_four_commission_status = serializers.SerializerMethodField()
     order_details = serializers.SerializerMethodField()
+    user_status = serializers.SerializerMethodField()
 
     class Meta:
         model = Z2HCustomers
@@ -177,7 +181,8 @@ class CustomerSerializer(serializers.ModelSerializer):
             'plan_start_date', 'referrer_name', 'referrer_id', 'level_one_completed', 'level_two_completed',
             'level_three_completed', 'level_four_completed', 'level_one_completed_date', 'level_two_completed_date',
             'level_three_completed_date', 'level_four_completed_date', 'level_one_commission_status', 'level_two_commission_status',
-            'level_three_commission_status', 'level_four_commission_status', 'order_details',
+            'level_three_commission_status', 'level_four_commission_status', 'order_details', 'nominee_name',
+            'customer_number', 'district', 'state', 'user_status',
         ]
     
     def get_date_of_birth(self, obj):
@@ -191,6 +196,9 @@ class CustomerSerializer(serializers.ModelSerializer):
     
     def get_mobile_number(self, obj):
         return RegisterUser.objects.get(user_id=obj.user_id).mobile_number
+    
+    def get_nominee_name(self, obj):
+        return RegisterUser.objects.get(user_id=obj.user_id).nominee_name.capitalize()
     
     def get_aadhar_number(self, obj):
         return RegisterUser.objects.get(user_id=obj.user_id).aadhar_number
@@ -232,6 +240,12 @@ class CustomerSerializer(serializers.ModelSerializer):
     
     def get_plan(self, obj):
         return Z2HPlanDetails.objects.filter(uid=obj.active_plan_uid).first().name
+    
+    def get_district(self, obj):
+        return RegisterUser.objects.get(user_id=obj.user_id).district.name
+    
+    def get_state(self, obj):
+        return RegisterUser.objects.get(user_id=obj.user_id).district.state.name
     
     def get_plan_start_date(self, obj):
         return obj.plan_start_date.strftime("%d-%m-%Y") if obj.plan_start_date else None
@@ -341,6 +355,12 @@ class CustomerSerializer(serializers.ModelSerializer):
     def get_order_details(self, obj):
         orders = Z2HOrders.objects.filter(customer=obj)
         return Z2HOrderSerializer(orders, many=True).data
+    
+    def get_user_status(self, obj):
+        if obj.user.is_active:
+            return "Active"
+        
+        return "Inactive"
     
     
 
