@@ -5,7 +5,7 @@ import os
 
 class ReferrerLimitPermission(permissions.BasePermission):
     def has_permission(self, request, view):
-        if request.method == 'PATCH':
+        if request.method in ['PATCH', 'PUT']:
             return True
         
         referred_by = request.data.get('referred_by', None)
@@ -16,4 +16,6 @@ class ReferrerLimitPermission(permissions.BasePermission):
         if not customer:
             return False
         
-        return RegisterUser.objects.filter(referred_by=customer.referrer).count() < int(os.environ["PRIMARY_LEG_COUNT"])
+        return RegisterUser.objects.filter(referred_by=customer.referrer).exclude(
+            is_admin_user=True
+        ).count() < int(os.environ["PRIMARY_LEG_COUNT"])

@@ -37,6 +37,7 @@ def generate_password(length=8):
     password_list = list(password)
     random.shuffle(password_list)
     password = ''.join(password_list)
+    password = password.replace("\\", "$").replace("\"", "*")
 
     return password
 
@@ -356,6 +357,53 @@ class RegisterUserView(APIView):
             return Response(data=data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def put(self, request, *args, **kwargs):
+        
+        data = {
+            "status": "success",
+            "message": "User Details Updated Successfully!!!",
+        }
+        
+        request_data = request.data
+
+        bank_name = request_data['bankName']
+        bank_account_number = request_data['bankAccountNumber']
+        name_as_in_bank = request_data['nameAsInBank']
+        bank_branch = request_data['bankBranch']
+        ifsc_code = request_data['ifscCode']
+        city = request_data['city']
+        town = request_data['town']
+        district = request_data['district']
+        address = request_data['address']
+        user_status = request_data['userStatus']
+        pin_code = request_data['pinCode']
+        customer_uid = request_data['customerUid']
+
+        user = Z2HCustomers.objects.filter(uid=customer_uid).first().user
+
+        RegisterUser.objects.filter(user=user).update(
+            name_of_bank=bank_name,
+            account_number=bank_account_number,
+            name_as_in_bank=name_as_in_bank,
+            bank_branch=bank_branch,
+            ifsc_code=ifsc_code,
+            city=city,
+            town=town,
+            district=district,
+            address=address,
+            pin_code=pin_code,
+        )
+
+        if user_status == 'Active':
+            user.is_active = True
+            user.save()
+
+        if user_status == 'Inactive':
+            user.is_active = False
+            user.save()
+
+        return Response(data, status=status.HTTP_200_OK)
     
 class UpdateRegisterUderDetailsView(APIView):
     authentication_classes = [authentication.TokenAuthentication]

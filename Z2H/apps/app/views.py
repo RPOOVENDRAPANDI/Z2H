@@ -142,7 +142,7 @@ class Z2HOrdersViewSet(ModelViewSet):
             "message": "Order updated successfully"
         }
 
-        if orders.order_status == 'pending':
+        if orders.order_status == 'yet_to_be_couriered':
             orders.courier_date = request.data['courier_date']
             orders.delivery_details = request.data['delivery_details']
             orders.order_status = request.data['order_status']
@@ -203,7 +203,7 @@ class PostPaymentView(APIView):
             order_cgst_amount=0.0,
             order_sgst_amount=0.0,
             order_total_amount=0.0,
-            order_status='pending',
+            order_status='yet_to_be_couriered',
             order_type='customer',
             delivery_date=None,
             delivery_details=None,
@@ -215,8 +215,18 @@ class PostPaymentView(APIView):
         return z2h_orders
     
     def create_order_details(self, request, request_data, order):
-
         product = Z2HProducts.objects.filter(uid=request_data['product']).first()
+
+        settings_order_item_number_text = Z2HSettings.objects.filter(name='order_item_number_text', is_active=True).first()
+        order_item_number_text = settings_order_item_number_text.value
+
+        settings_order_item_number_sequence = Z2HSettings.objects.filter(name='order_item_number_sequence', is_active=True).first()
+        order_item_number_sequence = int(settings_order_item_number_sequence.value)
+
+        settings_order_item_number_sequence.value = str(order_item_number_sequence + 1)
+        settings_order_item_number_sequence.save()
+
+        order_item_number = order_item_number_text + str(order_item_number_sequence)
 
         cgst_percentage = 2.50
         cgst_amount = 2.50
@@ -242,6 +252,7 @@ class PostPaymentView(APIView):
             igst_amount=igst_amount,
             gst_total_amount=gst_total_amount,
             total_amount=total_amount,
+            order_item_number=order_item_number,
         )
 
         return z2h_order_items

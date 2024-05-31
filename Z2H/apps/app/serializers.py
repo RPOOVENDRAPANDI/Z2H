@@ -72,7 +72,7 @@ class Z2HOrderSerializer(serializers.ModelSerializer):
             'order_id', 'order_date', 'order_cgst_amount', 'order_sgst_amount', 'order_igst_amount', 'order_gst_total_amount',
             'order_total_amount', 'order_status', 'delivery_date', 'delivery_through', 'delivery_number', 'delivery_address',
             'payment_mode', 'payment_status', 'payment_date', 'payment_reference', 'customer_name', 'mobile_number',
-            'courier_date', 'delivery_date', 'order_items', 'order_number',
+            'courier_date', 'delivery_date', 'order_items', 'order_number', 'uid',
         )
 
     def get_delivery_through(self, obj):
@@ -132,7 +132,17 @@ class Z2HOrderSerializer(serializers.ModelSerializer):
         return obj.delivery_date.strftime("%d-%m-%Y") if obj.delivery_date else None
     
     def get_order_status(self, obj):
-        return obj.order_status.capitalize() if obj.order_status else None
+        if not obj.order_status:
+            return None
+        
+        if obj.order_status == 'cancelled':
+            return 'Cancelled'
+        elif obj.order_status == 'delivered':
+            return 'Delivered'
+        elif obj.order_status == 'yet_to_be_couriered':
+            return 'Yet to be Couriered'
+        elif obj.order_status == 'in_transit':
+            return 'In Transit'
     
     def get_order_items(self, obj):
         return Z2HOrderItemSerializer(Z2HOrderItems.objects.filter(order=obj), many=True).data
@@ -146,7 +156,8 @@ class Z2HOrderItemSerializer(serializers.ModelSerializer):
         model = Z2HOrderItems
         fields = (
             'product_id', 'product_name', 'quantity', 'hsn_code', 'price', 'cgst_percentage', 'cgst_amount', 'sgst_percentage',
-            'sgst_amount', 'igst_percentage', 'igst_amount', 'gst_total_amount', 'total_amount', 'uid', 'order_uid'
+            'sgst_amount', 'igst_percentage', 'igst_amount', 'gst_total_amount', 'total_amount', 'uid', 'order_uid', 
+            'order_item_number',
         )
 
 class Z2HAdvertisementsSerializer(serializers.ModelSerializer):

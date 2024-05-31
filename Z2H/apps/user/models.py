@@ -122,6 +122,7 @@ class RegisterUser(ZeroToHeroBaseModel):
     profile_photo_path = models.CharField(max_length=256, null=True, blank=True)
     email_address = models.CharField(max_length=256, null=False, blank=False)
     alternate_mobile_number = models.CharField(max_length=64, null=True, blank=True)
+    is_admin_user = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name

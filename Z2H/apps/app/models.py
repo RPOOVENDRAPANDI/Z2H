@@ -72,8 +72,8 @@ class Z2HOrders(ZeroToHeroBaseModel):
         ('customer', 'customer'),
     )
     ORDER_STATUS_CHOICES = (
-        ('pending', 'Confimed by customer - Payment done- Waiting for dispatch by company'),
-        ('couriered', 'Couriered by company'),
+        ('yet_to_be_couriered', 'Confimed by customer - Payment done- Waiting for dispatch by company'),
+        ('in_transit', 'Couriered by company'),
         ('delivered', 'Delivered'),
         ('cancelled', 'Cancelled'),
     )
@@ -87,7 +87,7 @@ class Z2HOrders(ZeroToHeroBaseModel):
     order_igst_amount = models.DecimalField(max_digits=13, decimal_places=2, null=True, blank=True)
     order_gst_total_amount = models.DecimalField(max_digits=13, decimal_places=2, null=True, blank=True)
     order_total_amount = models.DecimalField(max_digits=13, decimal_places=2, null=True, blank=True)
-    order_status = models.CharField(max_length=64, null=True, blank=True, default='pending')
+    order_status = models.CharField(max_length=64, null=True, blank=True, default='yet_to_be_couriered')
     order_type = models.CharField(max_length=64, null=True, blank=True, default='customer')
     courier_date = models.DateTimeField(null=True, blank=True)
     delivery_date = models.DateTimeField(null=True, blank=True)
@@ -97,6 +97,7 @@ class Z2HOrders(ZeroToHeroBaseModel):
 class Z2HOrderItems(ZeroToHeroBaseModel):
     order = models.ForeignKey(Z2HOrders, on_delete=models.CASCADE, null=True, blank=True)
     product = models.ForeignKey(Z2HProducts, on_delete=models.CASCADE, null=True, blank=True)
+    order_item_number = models.CharField(max_length=64, null=True, blank=True)
     hsn_code = models.CharField(max_length=64, null=True, blank=True)
     quantity = models.IntegerField(null=True, blank=True)
     price = models.DecimalField(max_digits=13, decimal_places=2, null=True, blank=True)
