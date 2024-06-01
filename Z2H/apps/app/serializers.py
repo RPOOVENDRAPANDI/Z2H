@@ -11,7 +11,7 @@ from .models import (
     Z2HWebPages,
     Z2HWebPageRoles,
 )
-from apps.user.models import Role, RegisterUser
+from apps.user.models import Role, RegisterUser, Z2HCustomers
 from datetime import datetime
 
 class Z2HPlanDetailsSerializer(serializers.ModelSerializer):
@@ -65,14 +65,18 @@ class Z2HOrderSerializer(serializers.ModelSerializer):
     order_igst_amount = serializers.SerializerMethodField()
     order_status = serializers.SerializerMethodField()
     order_items = serializers.SerializerMethodField()
+    referrer_id = serializers.SerializerMethodField()
+    referrer_name = serializers.SerializerMethodField()
+    referrer_mobile_number = serializers.SerializerMethodField()
 
     class Meta:
         model = Z2HOrders
         fields = (
-            'order_id', 'order_date', 'order_cgst_amount', 'order_sgst_amount', 'order_igst_amount', 'order_gst_total_amount',
+            'order_id', 'order_date', 'total_product_price', 'order_cgst_amount', 'order_sgst_amount', 'order_igst_amount', 'order_gst_total_amount',
             'order_total_amount', 'order_status', 'delivery_date', 'delivery_through', 'delivery_number', 'delivery_address',
             'payment_mode', 'payment_status', 'payment_date', 'payment_reference', 'customer_name', 'mobile_number',
-            'courier_date', 'delivery_date', 'order_items', 'order_number', 'uid',
+            'courier_date', 'delivery_date', 'order_items', 'order_number', 'uid', 'referrer_id', 'referrer_name',
+            'referrer_mobile_number',
         )
 
     def get_delivery_through(self, obj):
@@ -146,6 +150,19 @@ class Z2HOrderSerializer(serializers.ModelSerializer):
     
     def get_order_items(self, obj):
         return Z2HOrderItemSerializer(Z2HOrderItems.objects.filter(order=obj), many=True).data
+
+    def get_referrer_id(self, obj):
+        referrer = Z2HCustomers.objects.filter(referrer=obj.customer.referrer).first()
+        return referrer.customer_number if referrer else None
+    
+    def get_referrer_name(self, obj):
+        user = Z2HCustomers.objects.filter(referrer=obj.customer.referrer).first().user
+        return user.name if user else None
+    
+    def get_referrer_mobile_number(self, obj):
+        user = Z2HCustomers.objects.filter(referrer=obj.customer.referrer).first().user
+        register_user = RegisterUser.objects.filter(user=user).first()
+        return register_user.mobile_number if register_user else None
     
 class Z2HOrderItemSerializer(serializers.ModelSerializer):
     product_id = serializers.CharField(source='product.uid')

@@ -82,6 +82,7 @@ class Z2HOrders(ZeroToHeroBaseModel):
     customer = models.ForeignKey(Z2HCustomers, on_delete=models.CASCADE, null=True, blank=True)
     order_number = models.CharField(max_length=64, null=True, blank=True)
     order_date = models.DateTimeField(null=True, blank=True)
+    total_product_price = models.DecimalField(max_digits=13, decimal_places=2, null=True, blank=True)
     order_cgst_amount = models.DecimalField(max_digits=13, decimal_places=2, null=True, blank=True)
     order_sgst_amount = models.DecimalField(max_digits=13, decimal_places=2, null=True, blank=True)
     order_igst_amount = models.DecimalField(max_digits=13, decimal_places=2, null=True, blank=True)

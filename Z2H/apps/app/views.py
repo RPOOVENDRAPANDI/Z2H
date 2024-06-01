@@ -264,18 +264,21 @@ class PostPaymentView(APIView):
         order_sgst_amount = 0.0
         order_gst_total_amount = 0.0
         order_total_amount = 0.0
+        total_product_amount = 0.0
 
         for item in z2h_order_items:
             order_cgst_amount += float(item.cgst_amount)
             order_sgst_amount += float(item.sgst_amount)
             order_gst_total_amount += float(item.gst_total_amount)
             order_total_amount += float(item.total_amount)
+            total_product_amount += float(item.price)
 
         Z2HOrders.objects.filter(uid=order.uid).update(
             order_cgst_amount=order_cgst_amount,
             order_sgst_amount=order_sgst_amount,
             order_gst_total_amount=order_gst_total_amount,
             order_total_amount=order_total_amount,
+            total_product_price=total_product_amount,
         )
 
         return True

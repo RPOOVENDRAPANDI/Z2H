@@ -187,7 +187,8 @@ class CustomerSerializer(serializers.ModelSerializer):
         ]
     
     def get_date_of_birth(self, obj):
-        return RegisterUser.objects.get(user_id=obj.user_id).date_of_birth
+        date_of_birth = RegisterUser.objects.get(user_id=obj.user_id).date_of_birth
+        return date_of_birth.strftime("%d-%m-%Y") if date_of_birth else ""
     
     def get_gender(self, obj):
         return RegisterUser.objects.get(user_id=obj.user_id).gender.capitalize()
