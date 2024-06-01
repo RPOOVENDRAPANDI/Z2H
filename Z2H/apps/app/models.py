@@ -44,11 +44,13 @@ class Z2HAdvertisements(ZeroToHeroBaseModel):
 class Z2HProductCategories(ZeroToHeroBaseModel):
     name = models.CharField(max_length=64, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
+    category_code = models.CharField(max_length=64, null=True, blank=True)
 
 class Z2HProductSubCategories(ZeroToHeroBaseModel):
     name = models.CharField(max_length=64, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     category = models.ForeignKey(Z2HProductCategories, on_delete=models.CASCADE, null=True, blank=True)
+    sub_category_code = models.CharField(max_length=64, null=True, blank=True)
 
 class Z2HProducts(ZeroToHeroBaseModel):
     name = models.CharField(max_length=64, null=True, blank=True)

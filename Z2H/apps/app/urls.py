@@ -7,15 +7,15 @@ app_name = 'plan_details'
 router = DefaultRouter()
 router.register(r'plan_details', views.Z2HPlanDetailsViewSet, basename='plan_details')
 router.register(r'orders', views.Z2HOrdersViewSet, basename='orders')
+router.register(r'product_categories', views.Z2HProductCategoriesViewSet, basename='product_categories')
+router.register(
+    r'product_sub_categories/(?P<product_category_uid>[0-9a-f-]{36})', 
+    views.Z2HProductSubCategoriesViewSet, 
+    basename='product_sub_categories'
+)
 urlpatterns = router.urls
 
 urlpatterns += [
-    path('product_categories/', views.Z2HProductCategoriesListView.as_view(), name='product_categories'),
-    path(
-        r'product_sub_categories/<str:product_category_uid>/', 
-        views.Z2HProductSubCategoriesListView.as_view(), 
-        name='product_sub_categories'
-    ),
     path(
         r'products/<str:product_sub_category_uid>/',
         views.Z2HProductsView.as_view(),

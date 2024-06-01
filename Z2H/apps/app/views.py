@@ -52,13 +52,27 @@ class Z2HPlanDetailsViewSet(ModelViewSet):
     ordering_fields = ['id']
     ordering = ['id']
 
-class Z2HProductCategoriesListView(ListAPIView):
+class Z2HProductCategoriesViewSet(ModelViewSet):
     queryset = Z2HProductCategories.objects.all()
     serializer_class = Z2HProductCategoriesSerializer
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [authentication.TokenAuthentication]
 
-class Z2HProductSubCategoriesListView(ListAPIView):
+    def perform_create(self, serializer):
+        product_category_code_settings = Z2HSettings.objects.filter(name='product_category_code', is_active=True).first()
+        product_category_code = product_category_code_settings.value
+
+        product_category_sequence_settings = Z2HSettings.objects.filter(name='product_category_sequence', is_active=True).first()
+        product_category_sequence = int(product_category_sequence_settings.value)
+
+        product_category_sequence_settings.value = str(product_category_sequence + 1)
+        product_category_sequence_settings.save()
+
+        category_code = product_category_code + str(product_category_sequence)
+
+        return serializer.save(category_code=category_code)
+
+class Z2HProductSubCategoriesViewSet(ModelViewSet):
     queryset = Z2HProductSubCategories.objects.all()
     serializer_class = Z2HProductSubCategoriesSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -69,6 +83,20 @@ class Z2HProductSubCategoriesListView(ListAPIView):
 
     def get_queryset(self):
         return Z2HProductSubCategories.objects.filter(category__uid=self.kwargs['product_category_uid'])
+
+    def perform_create(self, serializer):
+        product_sub_category_code_settings = Z2HSettings.objects.filter(name='product_sub_category_code', is_active=True).first()
+        product_sub_category_code = product_sub_category_code_settings.value
+
+        product_sub_category_sequence_settings = Z2HSettings.objects.filter(name='product_sub_category_sequence', is_active=True).first()
+        product_sub_category_sequence = int(product_sub_category_sequence_settings.value)
+
+        product_sub_category_sequence_settings.value = str(product_sub_category_sequence + 1)
+        product_sub_category_sequence_settings.save()
+
+        sub_category_code = product_sub_category_code + str(product_sub_category_sequence)
+
+        return serializer.save(sub_category_code=sub_category_code)
     
 class Z2HProductsView(ListAPIView):
     queryset = Z2HProducts.objects.all()

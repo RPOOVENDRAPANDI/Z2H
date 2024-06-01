@@ -20,17 +20,24 @@ class Z2HPlanDetailsSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class Z2HProductCategoriesSerializer(serializers.ModelSerializer):
+    sub_categories = serializers.SerializerMethodField()
+
     class Meta:
         model = Z2HProductCategories
         fields = (
-            'id', 'is_active', 'uid', 'name', 'description',
+            'id', 'is_active', 'uid', 'name', 'description', 'sub_categories', 'category_code',
         )
 
+    def get_sub_categories(self, obj):
+        return [sub_category.uid for sub_category in Z2HProductSubCategories.objects.filter(category=obj, is_active=True)]
+
 class Z2HProductSubCategoriesSerializer(serializers.ModelSerializer):
+    category_code = serializers.CharField(source='category.category_code')
+
     class Meta:
         model = Z2HProductSubCategories
         fields = (
-            'id', 'is_active', 'uid', 'name', 'description', 'category',
+            'id', 'is_active', 'uid', 'name', 'description', 'category', 'sub_category_code', 'category_code',
         )
 
 class Z2HProductSerializer(serializers.ModelSerializer):
