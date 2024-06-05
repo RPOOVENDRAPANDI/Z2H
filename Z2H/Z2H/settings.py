@@ -93,7 +93,7 @@ WSGI_APPLICATION = 'Z2H.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': os.environ['ENGINE'],
         'NAME': os.environ['DBNAME'],
         'USER': os.environ['DBUSER'],
         'PASSWORD': os.environ['DBPASSWORD'],
