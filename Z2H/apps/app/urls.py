@@ -13,14 +13,11 @@ router.register(
     views.Z2HProductSubCategoriesViewSet, 
     basename='product_sub_categories'
 )
+router.register(r'products/(?P<product_sub_category_uid>[0-9a-f-]{36})', views.Z2HProductsViewSet, basename='products')
+
 urlpatterns = router.urls
 
 urlpatterns += [
-    path(
-        r'products/<str:product_sub_category_uid>/',
-        views.Z2HProductsView.as_view(),
-        name="products"
-    ),
     path(
         r'products_list/', views.Z2HProductsListView.as_view(), name="products_list"
     ),

@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import authentication, permissions, status
 from rest_framework import filters
+from rest_framework.decorators import action
 from .models import (
     Z2HPlanDetails,
     Z2HProductCategories,
@@ -26,6 +27,7 @@ from apps.app.serializers import (
     Z2HAdvertisementsSerializer,
     Z2HWebPageSerializer,
     Z2HWebPageRolesSerializer,
+    Z2HCreateProductSubCategoriesSerializer,
 )
 from apps.user.serializers import RoleSerializer
 from apps.user.models import Z2HCustomers, RegisterUser, Role
@@ -81,6 +83,12 @@ class Z2HProductSubCategoriesViewSet(ModelViewSet):
     lookup_url_kwarg = 'uid'
     lookup_value_regex = LOOKUP_REGEX
 
+    def get_serializer_class(self):
+        if self.action in ['list', 'retrieve']:
+            return Z2HProductSubCategoriesSerializer
+        
+        return Z2HCreateProductSubCategoriesSerializer
+
     def get_queryset(self):
         return Z2HProductSubCategories.objects.filter(category__uid=self.kwargs['product_category_uid'])
 
@@ -98,7 +106,7 @@ class Z2HProductSubCategoriesViewSet(ModelViewSet):
 
         return serializer.save(sub_category_code=sub_category_code)
     
-class Z2HProductsView(ListAPIView):
+class Z2HProductsViewSet(ModelViewSet):
     queryset = Z2HProducts.objects.all()
     serializer_class = Z2HProductSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -109,6 +117,16 @@ class Z2HProductsView(ListAPIView):
 
     def get_queryset(self):
         return Z2HProducts.objects.filter(sub_category__uid=self.kwargs['product_sub_category_uid'])
+    
+    @action(detail=False, methods=['POST', ], url_path='add', url_name='add')
+    def add_product(self, request, *args, **kwargs):
+        product_name = request.data.get('productName', None)
+        product_description = request.data.get('productDescription', None)
+        hsn_code = request.data.get('hsnCode', None)
+        product_image_urls = request.data.get('productImageUrls', None)
+
+        pass
+
     
 class Z2HProductsListView(ListAPIView):
     queryset = Z2HProducts.objects.all()

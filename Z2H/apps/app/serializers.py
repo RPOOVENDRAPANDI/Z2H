@@ -29,7 +29,8 @@ class Z2HProductCategoriesSerializer(serializers.ModelSerializer):
         )
 
     def get_sub_categories(self, obj):
-        return [sub_category.uid for sub_category in Z2HProductSubCategories.objects.filter(category=obj, is_active=True)]
+        return Z2HProductSubCategoriesSerializer(Z2HProductSubCategories.objects.filter(category=obj, is_active=True), many=True).data
+        
 
 class Z2HProductSubCategoriesSerializer(serializers.ModelSerializer):
     category_code = serializers.CharField(source='category.category_code')
@@ -39,6 +40,14 @@ class Z2HProductSubCategoriesSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'is_active', 'uid', 'name', 'description', 'category', 'sub_category_code', 'category_code',
         )
+
+class Z2HCreateProductSubCategoriesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Z2HProductSubCategories
+        fields = (
+            'id', 'is_active', 'uid', 'name', 'description', 'category', 'sub_category_code',
+        )
+
 
 class Z2HProductSerializer(serializers.ModelSerializer):
     product_image_urls = serializers.SerializerMethodField()

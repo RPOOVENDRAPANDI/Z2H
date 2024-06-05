@@ -53,6 +53,7 @@ class Z2HProductSubCategories(ZeroToHeroBaseModel):
     sub_category_code = models.CharField(max_length=64, null=True, blank=True)
 
 class Z2HProducts(ZeroToHeroBaseModel):
+    product_code = models.CharField(max_length=64, null=True, blank=True)
     name = models.CharField(max_length=64, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     sub_category = models.ForeignKey(Z2HProductSubCategories, on_delete=models.CASCADE, null=True, blank=True)
@@ -63,6 +64,7 @@ class Z2HProducts(ZeroToHeroBaseModel):
     discount_start_date = models.DateTimeField(null=True, blank=True)
     discount_end_date = models.DateTimeField(null=True, blank=True)
     offer_price = models.DecimalField(max_digits=13, decimal_places=2, null=True, blank=True)
+    plan = models.ForeignKey(Z2HPlanDetails, on_delete=models.CASCADE, null=True, blank=True)
 
 class Z2HProductImages(ZeroToHeroBaseModel):
     product_image_url = models.CharField(max_length=256, null=True, blank=True)
