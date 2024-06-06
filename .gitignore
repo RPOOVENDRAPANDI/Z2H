@@ -3,3 +3,5 @@ venv
 
 *.pyc
 *.pyo
+
+Z2H/static
