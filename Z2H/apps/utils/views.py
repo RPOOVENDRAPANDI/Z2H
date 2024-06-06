@@ -82,7 +82,7 @@ class UploadImageView(APIView):
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         
-        file_uploaded_url = f"{os.environ['APP_URL']}/static/{upload_type}/{proper_file_name}"
+        file_uploaded_url = f"{os.environ['APP_URL']}/z2h_uploads/{upload_type}/{proper_file_name}"
 
         data = {
             "status": "success",
