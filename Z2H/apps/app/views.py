@@ -11,6 +11,7 @@ from .models import (
     Z2HProductCategories,
     Z2HProductSubCategories,
     Z2HProducts,
+    Z2HProductImages,
     Z2HOrders,
     Z2HOrderItems,
     Z2HAdvertisements,
@@ -125,8 +126,34 @@ class Z2HProductsViewSet(ModelViewSet):
         hsn_code = request.data.get('hsnCode', None)
         product_image_urls = request.data.get('productImageUrls', None)
 
-        pass
+        product_sub_category_obj = Z2HProductSubCategories.objects.filter(uid=self.kwargs['product_sub_category_uid']).first()
 
+        product_code_settings = Z2HSettings.objects.filter(name='product_code', is_active=True).first()
+        product_code_value = product_code_settings.value
+
+        product_code_sequence_settings = Z2HSettings.objects.filter(name='prod_code_sequence', is_active=True).first()
+        product_code_sequence = int(product_code_sequence_settings.value)
+
+        product_code_settings.value = str(product_code_sequence + 1)
+        product_code_settings.save()
+
+        product_code = product_code_value + str(product_code_sequence)
+
+        product = Z2HProducts.objects.create(
+            name=product_name,
+            description=product_description,
+            price=0.00,
+            discount=0.00,
+            offer_price=0.00,
+            hsn_code=hsn_code,
+            sub_category=product_sub_category_obj,
+            product_code=product_code,
+        )
+
+        for product_image in product_image_urls:
+            Z2HProductImages.objects.create(product_image_url=product_image, product=product)
+
+        return Response({'message': 'Product added successfully'}, status=status.HTTP_200_OK)
     
 class Z2HProductsListView(ListAPIView):
     queryset = Z2HProducts.objects.all()

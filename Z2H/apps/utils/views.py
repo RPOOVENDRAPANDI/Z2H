@@ -36,22 +36,59 @@ class UploadImageView(APIView):
         file_name_date = file_name_without_extension.replace(".", "") + "_" + str(datetime.now()).replace("-", "_").replace(" ", "_").replace(":", "_").replace(".","_") + file_name_extension
         file_name_proper = file_name_date.replace(" ", "_").replace("-", "_").replace("'", "").replace("#", "_No_").replace("&", "_").replace("(", "_").replace(")", "_")
         return file_name_proper
+    
+    def handle_product_image_upload(self, request, upload_type):
+        data = dict()
+        file_uploaded_urls = list()
+        try:
+            file_name_list = request.FILES.getlist('file_name')
+
+            for file in file_name_list:
+                file_name = file.name
+                file_uplaod_path = os.path.join(settings.STATICFILES_DIRS[0], "product_image")
+                proper_file_name = self.get_proper_file_name(file_name)
+                file_to_upload = os.path.join(file_uplaod_path, proper_file_name)
+
+                if not os.path.exists(file_uplaod_path):
+                    os.makedirs(file_uplaod_path)
+
+                with open(file_to_upload, "wb") as destination:
+                    for chunk in file.chunks():
+                        destination.write(chunk)
+                        destination.close()
+            
+                file_uploaded_url = f"{os.environ['APP_URL']}/static/{upload_type}/{proper_file_name}"
+                file_uploaded_urls.append(file_uploaded_url)
+        
+        except KeyError:
+            data = {
+                "status": "error",
+                "message": "Invalid File or File not Found!!!"
+            }
+
+        data = {
+            "status": "success",
+            "message": "Image Uploaded Successfully",
+            "image_upload_paths": file_uploaded_urls,
+        }
+        return Response(data, status=status.HTTP_200_OK)
+
+
 
     def post(self, request):
         upload_type = request.data.get('upload_type')
-        # file_name_list = request.FILES.getlist('file_name')
 
-        # print("file_name_list", file_name_list)
-        # print("upload_type", upload_type)
+        is_valid_upload_type = True if upload_type in ['profile_image', 'product_image', 'demo_video'] else False
 
-        is_valida_upload_type = True if upload_type in ['profile_image', 'product_image', 'demo_video'] else False
-
-        if not is_valida_upload_type:
+        if not is_valid_upload_type:
             data = {
                 "status": "error",
                 "message": "Invalid Upload Type"
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        
+        if upload_type == 'product_image':
+            return self.handle_product_image_upload(request, upload_type)
 
         try:
             file_name = request.FILES["file_name"].name
@@ -82,7 +119,7 @@ class UploadImageView(APIView):
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         
-        file_uploaded_url = f"{os.environ['APP_URL']}/z2h_uploads/{upload_type}/{proper_file_name}"
+        file_uploaded_url = f"{os.environ['APP_URL']}/static/{upload_type}/{proper_file_name}"
 
         data = {
             "status": "success",

@@ -155,8 +155,8 @@ REST_FRAMEWORK = {
     ]
 }
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT =os.path.join(BASE_DIR, "root")
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'z2h_uploads')
+    os.path.join(BASE_DIR, 'static')
 ]

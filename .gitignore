@@ -5,3 +5,4 @@ venv
 *.pyo
 
 Z2H/static
+Z2H/root
