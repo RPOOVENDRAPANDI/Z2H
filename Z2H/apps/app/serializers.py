@@ -21,48 +21,78 @@ class Z2HPlanDetailsSerializer(serializers.ModelSerializer):
 
 class Z2HProductCategoriesSerializer(serializers.ModelSerializer):
     sub_categories = serializers.SerializerMethodField()
+    product_category_status = serializers.SerializerMethodField()
 
     class Meta:
         model = Z2HProductCategories
         fields = (
-            'id', 'is_active', 'uid', 'name', 'description', 'sub_categories', 'category_code',
+            'id', 'is_active', 'uid', 'name', 'description', 'sub_categories', 'category_code', 'product_category_status',
         )
 
     def get_sub_categories(self, obj):
         return Z2HProductSubCategoriesSerializer(Z2HProductSubCategories.objects.filter(category=obj, is_active=True), many=True).data
+    
+    def get_product_category_status(self, obj):
+        if obj.is_active:
+            return 'Active'
+        
+        return 'Inactive'
         
 
 class Z2HProductSubCategoriesSerializer(serializers.ModelSerializer):
     category_code = serializers.CharField(source='category.category_code')
+    product_sub_category_status = serializers.SerializerMethodField()
 
     class Meta:
         model = Z2HProductSubCategories
         fields = (
             'id', 'is_active', 'uid', 'name', 'description', 'category', 'sub_category_code', 'category_code',
+            'product_sub_category_status',
         )
 
+    def get_product_sub_category_status(self, obj):
+        if obj.is_active:
+            return 'Active'
+
+        return 'Inactive'
+
 class Z2HCreateProductSubCategoriesSerializer(serializers.ModelSerializer):
+    product_sub_category_status = serializers.SerializerMethodField()
+
     class Meta:
         model = Z2HProductSubCategories
         fields = (
-            'id', 'is_active', 'uid', 'name', 'description', 'category', 'sub_category_code',
+            'id', 'is_active', 'uid', 'name', 'description', 'category', 'sub_category_code', 'product_sub_category_status',
         )
+
+    def get_product_sub_category_status(self, obj):
+        if obj.is_active:
+            return 'Active'
+
+        return 'Inactive'
 
 
 class Z2HProductSerializer(serializers.ModelSerializer):
     product_image_urls = serializers.SerializerMethodField()
     sub_category_uid = serializers.CharField(source='sub_category.uid')
     category_uid = serializers.CharField(source='sub_category.category.uid')
+    product_active_status = serializers.SerializerMethodField()
 
     class Meta:
         model = Z2HProducts
         fields = (
             'id', 'is_active', 'uid', 'name', 'description', 'sub_category_uid', 'category_uid', 'product_image_urls', 
-            'price', 'discount', 'offer_price'
+            'price', 'discount', 'offer_price', 'product_active_status',
         )
 
     def get_product_image_urls(self, obj):
-        return [image.product_image_url for image in Z2HProductImages.objects.filter(product=obj, is_active=True)]
+        return [{"url": image.product_image_url, "uid": image.uid} for image in Z2HProductImages.objects.filter(product=obj, is_active=True)]
+
+    def get_product_active_status(self, obj):
+        if obj.is_active:
+            return 'Active'
+
+        return 'Inactive'
     
 class Z2HOrderSerializer(serializers.ModelSerializer):
     order_id = serializers.CharField(source='order_number')

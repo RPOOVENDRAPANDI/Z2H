@@ -148,12 +148,17 @@ class Z2HProductsViewSet(ModelViewSet):
             hsn_code=hsn_code,
             sub_category=product_sub_category_obj,
             product_code=product_code,
+            is_active=False,
         )
 
         for product_image in product_image_urls:
             Z2HProductImages.objects.create(product_image_url=product_image, product=product)
 
-        return Response({'message': 'Product added successfully'}, status=status.HTTP_200_OK)
+        created_product = Z2HProductSerializer(
+            Z2HProducts.objects.get(id=product.id)
+        ).data
+
+        return Response(created_product, status=status.HTTP_200_OK)
     
 class Z2HProductsListView(ListAPIView):
     queryset = Z2HProducts.objects.all()
