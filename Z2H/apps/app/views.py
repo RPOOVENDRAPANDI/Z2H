@@ -17,6 +17,7 @@ from .models import (
     Z2HAdvertisements,
     Z2HWebPages,
     Z2HWebPageRoles,
+    Z2HProductsReturned,
 )
 from apps.app.serializers import (
     Z2HPlanDetailsSerializer,
@@ -29,6 +30,7 @@ from apps.app.serializers import (
     Z2HWebPageSerializer,
     Z2HWebPageRolesSerializer,
     Z2HCreateProductSubCategoriesSerializer,
+    Z2HProductsReturedSerializer,
 )
 from apps.user.serializers import RoleSerializer
 from apps.user.models import Z2HCustomers, RegisterUser, Role
@@ -167,7 +169,25 @@ class Z2HProductsListView(ListAPIView):
     authentication_classes = [authentication.TokenAuthentication]
 
     def get_queryset(self):
-        return Z2HProducts.objects.all()
+        product_type = self.request.query_params.get('product_type', None)
+
+        if product_type == "inactive":
+            return Z2HProducts.objects.filter(is_active=False)
+
+        return Z2HProducts.objects.filter(is_active=True)
+    
+class Z2HProductsPlanMapView(APIView):
+
+    def post(self, request, *args, **kwargs):
+        product_uid = request.data.get('product_uids', None)
+        plan_uid = request.data.get('plan_uid', None)
+
+        plan_obj = Z2HPlanDetails.objects.filter(uid=plan_uid).first()
+
+        Z2HProducts.objects.filter(uid__in=product_uid).update(plan=plan_obj, is_active=True)
+
+        return Response({"status": "success", "message": "Plan map updated successfully"}, status=status.HTTP_200_OK)
+    
     
 class Z2HOrdersListView(ListAPIView):
     queryset = Z2HOrderItems.objects.all()
@@ -313,7 +333,7 @@ class PostPaymentView(APIView):
         igst_percentage = 0.00
         igst_amount = 0.00
         gst_total_amount = cgst_amount + sgst_amount + igst_amount
-        price = float(product.offer_price) - cgst_amount - sgst_amount
+        price = float(product.plan.registration_fee) - cgst_amount - sgst_amount
         total_amount = price + gst_total_amount
 
         z2h_order_items = Z2HOrderItems.objects.create(
@@ -776,5 +796,11 @@ class SaveWebUserSettingsView(APIView):
 class Z2HWebPageRolesView(ListAPIView):
     queryset = Z2HWebPageRoles.objects.all()
     serializer_class = Z2HWebPageRolesSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [authentication.TokenAuthentication]
+
+class Z2HProductsReturedViewset(ModelViewSet):
+    queryset = Z2HProductsReturned.objects.all()
+    serializer_class = Z2HProductsReturedSerializer
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [authentication.TokenAuthentication]

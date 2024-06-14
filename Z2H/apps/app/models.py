@@ -114,3 +114,11 @@ class Z2HOrderItems(ZeroToHeroBaseModel):
     igst_amount = models.DecimalField(max_digits=13, decimal_places=2, null=True, blank=True)
     gst_total_amount = models.DecimalField(max_digits=13, decimal_places=2, null=True, blank=True)
     total_amount = models.DecimalField(max_digits=13, decimal_places=2, null=True, blank=True)
+
+class Z2HProductsReturned(ZeroToHeroBaseModel):
+    product_id = models.CharField(max_length=64, null=True, blank=True)
+    customer_id = models.CharField(max_length=64, null=True, blank=True)
+    customer_name = models.CharField(max_length=200, null=True, blank=True)
+    mobile_number = models.CharField(max_length=20, null=True, blank=True)
+    product_returned_date = models.DateTimeField(null=True, blank=True)
+    comments = models.TextField(null=True, blank=True)

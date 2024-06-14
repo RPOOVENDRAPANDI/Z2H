@@ -55,7 +55,8 @@ class UploadImageView(APIView):
                 with open(file_to_upload, "wb") as destination:
                     for chunk in file.chunks():
                         destination.write(chunk)
-                        destination.close()
+                
+                destination.close()
             
                 file_uploaded_url = f"{os.environ['APP_URL']}/static/{upload_type}/{proper_file_name}"
                 file_uploaded_urls.append(file_uploaded_url)

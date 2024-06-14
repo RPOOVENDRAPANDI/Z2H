@@ -10,6 +10,7 @@ from .models import (
     Z2HAdvertisements,
     Z2HWebPages,
     Z2HWebPageRoles,
+    Z2HProductsReturned,
 )
 from apps.user.models import Role, RegisterUser, Z2HCustomers
 from datetime import datetime
@@ -77,12 +78,14 @@ class Z2HProductSerializer(serializers.ModelSerializer):
     sub_category_uid = serializers.CharField(source='sub_category.uid')
     category_uid = serializers.CharField(source='sub_category.category.uid')
     product_active_status = serializers.SerializerMethodField()
+    plan_name = serializers.SerializerMethodField()
+    price = serializers.FloatField(source='plan.registration_fee')
 
     class Meta:
         model = Z2HProducts
         fields = (
             'id', 'is_active', 'uid', 'name', 'description', 'sub_category_uid', 'category_uid', 'product_image_urls', 
-            'price', 'discount', 'offer_price', 'product_active_status',
+            'price', 'discount', 'offer_price', 'product_active_status', 'product_code', 'plan_name',
         )
 
     def get_product_image_urls(self, obj):
@@ -93,6 +96,12 @@ class Z2HProductSerializer(serializers.ModelSerializer):
             return 'Active'
 
         return 'Inactive'
+    
+    def get_plan_name(self, obj):
+        if obj.plan:
+            return obj.plan.name
+
+        return None
     
 class Z2HOrderSerializer(serializers.ModelSerializer):
     order_id = serializers.CharField(source='order_number')
@@ -253,3 +262,13 @@ class Z2HWebPageRolesSerializer(serializers.ModelSerializer):
     
     def get_web_page_name(self, obj):
         return Z2HWebPages.objects.filter(uid=obj.web_page_uid).first().name
+    
+class Z2HProductsReturedSerializer(serializers.ModelSerializer):
+    product_returned_date = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Z2HProductsReturned
+        fields = '__all__'
+
+    def get_product_returned_date(self, obj):
+        return obj.product_returned_date.strftime("%d-%m-%Y") if obj.product_returned_date else None
