@@ -134,8 +134,8 @@ class Z2HProductsViewSet(ModelViewSet):
         product_code_sequence_settings = Z2HSettings.objects.filter(name='prod_code_sequence', is_active=True).first()
         product_code_sequence = int(product_code_sequence_settings.value)
 
-        product_code_settings.value = str(product_code_sequence + 1)
-        product_code_settings.save()
+        product_code_sequence_settings.value = str(product_code_sequence + 1)
+        product_code_sequence_settings.save()
 
         product_code = product_code_value + str(product_code_sequence)
 
