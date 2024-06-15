@@ -83,6 +83,10 @@ class Z2HCustomers(ZeroToHeroBaseModel):
     level_two_commission_details = models.JSONField(default=dict)
     level_three_commission_details = models.JSONField(default=dict)
     level_four_commission_details = models.JSONField(default=dict)
+    level_one_commission_paid_date = models.DateTimeField(null=True, blank=True)
+    level_two_commission_paid_date = models.DateTimeField(null=True, blank=True)
+    level_three_commission_paid_date = models.DateTimeField(null=True, blank=True)
+    level_four_commission_paid_date = models.DateTimeField(null=True, blank=True)
 
 class RegisterUser(ZeroToHeroBaseModel):
 
