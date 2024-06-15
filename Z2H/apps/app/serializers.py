@@ -79,7 +79,7 @@ class Z2HProductSerializer(serializers.ModelSerializer):
     category_uid = serializers.CharField(source='sub_category.category.uid')
     product_active_status = serializers.SerializerMethodField()
     plan_name = serializers.SerializerMethodField()
-    price = serializers.FloatField(source='plan.registration_fee')
+    price = serializers.SerializerMethodField()
 
     class Meta:
         model = Z2HProducts
@@ -100,6 +100,12 @@ class Z2HProductSerializer(serializers.ModelSerializer):
     def get_plan_name(self, obj):
         if obj.plan:
             return obj.plan.name
+
+        return None
+    
+    def get_price(self, obj):
+        if obj.plan:
+            return obj.plan.registration_fee
 
         return None
     

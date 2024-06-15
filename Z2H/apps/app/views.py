@@ -119,7 +119,7 @@ class Z2HProductsViewSet(ModelViewSet):
     lookup_value_regex = LOOKUP_REGEX
 
     def get_queryset(self):
-        return Z2HProducts.objects.filter(sub_category__uid=self.kwargs['product_sub_category_uid'])
+        return Z2HProducts.objects.filter(sub_category__uid=self.kwargs['product_sub_category_uid'], is_active=True)
     
     @action(detail=False, methods=['POST', ], url_path='add', url_name='add')
     def add_product(self, request, *args, **kwargs):

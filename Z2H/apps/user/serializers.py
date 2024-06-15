@@ -364,6 +364,7 @@ class CustomerSerializer(serializers.ModelSerializer):
         
         return "Inactive"
     
-    
-
-    
+class Z2HCommissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Z2HCustomers
+        fields = '__all__'

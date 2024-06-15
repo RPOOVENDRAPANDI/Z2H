@@ -13,6 +13,7 @@ from apps.user.serializers import (
     WebAuthTokenSerializer,
     CustomerSerializer,
     UpdateRegisterUserDetailsSerializer,
+    Z2HCommissionSerializer,
 )
 from apps.user.permissions import ReferrerLimitPermission
 from apps.user.models import Z2HUser, Z2HCustomers, Z2HUserRoles, Role, RegisterUser
@@ -631,6 +632,23 @@ class CustomerViewSet(viewsets.ModelViewSet):
             "second_level_customers": second_level_customers_data,
             "third_level_customers": third_level_customers_data,
             "fourth_level_customers": fourth_level_customers_data,
+        }
+
+        return Response(data=data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET', ], url_path="commission_details", url_name="commission-details")
+    def get_commission_details(self, request, *args, **kwargs):
+        commission_from_date = request.query_params.get('commission_from_date', None)
+        commission_to_date = request.query_params.get('commission_to_date', None)
+
+        customer = Z2HCustomers.objects.all()
+
+        commission_data = Z2HCommissionSerializer(customer, many=True).data
+
+        data = {
+            "status": "success",
+            "message": "Commission Details Fetched Successfully!!!",
+            "commissions": commission_data,
         }
 
         return Response(data=data, status=status.HTTP_200_OK)
