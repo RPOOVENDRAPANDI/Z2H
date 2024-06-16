@@ -119,6 +119,11 @@ class Z2HProductsViewSet(ModelViewSet):
     lookup_value_regex = LOOKUP_REGEX
 
     def get_queryset(self):
+        product_type = self.request.query_params.get('product_type', None)
+
+        if product_type and product_type == "all":
+            return Z2HProducts.objects.filter(sub_category__uid=self.kwargs['product_sub_category_uid'])
+
         return Z2HProducts.objects.filter(sub_category__uid=self.kwargs['product_sub_category_uid'], is_active=True)
     
     @action(detail=False, methods=['POST', ], url_path='add', url_name='add')
@@ -275,6 +280,9 @@ class PostPaymentView(APIView):
                 return False
         
         return True
+    
+    def check_product_exists(self, product_uid):
+        return Z2HProducts.objects.filter(uid=product_uid, is_active=True).exists()
     
     def create_order(self, request, request_data):
         payment_details = {
@@ -562,6 +570,13 @@ class PostPaymentView(APIView):
         if request_data['payment_status'] != 'success':
             data['status'] = 'error'
             data['message'] = 'Payment Failed!!!'
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+        
+        product_exists = self.check_product_exists(request_data['product'])
+
+        if not product_exists:
+            data['status'] = 'error'
+            data['message'] = 'Product Not Found!!!'
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
         create_order = self.create_order(request, request_data)
