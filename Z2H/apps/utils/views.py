@@ -12,6 +12,8 @@ import os
 
 # Create your views here.
 
+ENVIRONMENT = os.environ.get('ENVIRONMENT', 'production')
+
 class StateView(ListAPIView):
     queryset = State.objects.all()
     serializer_class = StateSerializer
@@ -57,8 +59,12 @@ class UploadImageView(APIView):
                         destination.write(chunk)
                 
                 destination.close()
-            
-                file_uploaded_url = f"{os.environ['APP_URL']}/static/{upload_type}/{proper_file_name}"
+
+                if ENVIRONMENT == 'local':
+                    file_uploaded_url = f"{os.environ['APP_URL']}/static/{upload_type}/{proper_file_name}"
+                elif ENVIRONMENT == 'production':
+                    file_uploaded_url = f"{os.environ['APP_URL']}/static/static/{upload_type}/{proper_file_name}"
+
                 file_uploaded_urls.append(file_uploaded_url)
         
         except KeyError:
