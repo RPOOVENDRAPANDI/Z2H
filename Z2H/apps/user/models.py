@@ -105,7 +105,7 @@ class RegisterUser(ZeroToHeroBaseModel):
     referred_by = models.ForeignKey(Z2HCustomers, on_delete=models.PROTECT, related_name="users", null=True, blank=True)
     role = models.ForeignKey(Role, on_delete=models.PROTECT, related_name='users', null=False, blank=False)
     user = models.OneToOneField(Z2HUser, on_delete=models.PROTECT, related_name="user", null=True, blank=True)
-    name = models.CharField(max_length=128, null=False, blank=False)
+    name = models.CharField(max_length=128, null=False, blank=False, unique=True)
     nominee_name = models.CharField(max_length=128, null=False, blank=False)
     date_of_birth = models.DateField(null=False, blank=False)
     marital_status = models.CharField(max_length=64, choices=MARITAL_CHOICES, null=False, blank=False)
