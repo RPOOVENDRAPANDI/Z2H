@@ -27,11 +27,12 @@ from django.db.models import Q
 LOOKUP_REGEX = '[0-9a-f-]{36}'
 
 def generate_password(length=8):
+    required_password_char_length = length - 2
     letters = string.ascii_letters
     digits = string.digits
     special_chars = string.punctuation
 
-    password = ''.join(random.choices(letters, k=length-2))
+    password = ''.join(random.choices(letters, k=required_password_char_length))
     password += random.choice(letters.upper())
     password += random.choice(digits)
     password += random.choice(special_chars)
@@ -40,6 +41,9 @@ def generate_password(length=8):
     random.shuffle(password_list)
     password = ''.join(password_list)
     password = password.replace("\\", "$").replace("\"", "*")
+
+    if len(password) < required_password_char_length:
+        password += generate_password(required_password_char_length - len(password))
 
     return password
 
