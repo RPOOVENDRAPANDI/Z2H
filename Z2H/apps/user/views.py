@@ -212,6 +212,7 @@ class GetUserInfoView(APIView):
             'enable_payment': enable_payment,
             "is_existing_user": is_existing_user,
             "user_customer_uid": user_customer.uid if user_customer else None,
+            "user_customer_number": user_customer.customer_number if user_customer else None,
         }
 
         data['user_info'] = user_info

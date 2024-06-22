@@ -31,16 +31,21 @@ class UserSerializer(serializers.ModelSerializer):
 class UserListSerializer(serializers.ModelSerializer):
     mobile_number = serializers.SerializerMethodField()
     name = serializers.SerializerMethodField()
+    customer_uid = serializers.SerializerMethodField()
     
     class Meta:
         model = get_user_model()
-        fields = ['name', 'uid', 'mobile_number']
+        fields = ['name', 'uid', 'mobile_number', 'customer_uid']
 
     def get_mobile_number(self, obj):
         return obj.user.email.split("@")[0]
     
     def get_name(self, obj):
         return obj.user.name
+    
+    def get_customer_uid(self, obj):
+        customer = Z2HCustomers.objects.filter(user=obj.id).first()
+        return customer.customer_number if customer else None
     
 class AuthTokenSerializer(serializers.Serializer):
     mobile_number = serializers.CharField()
