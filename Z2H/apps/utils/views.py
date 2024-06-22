@@ -126,7 +126,10 @@ class UploadImageView(APIView):
             }
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         
-        file_uploaded_url = f"{os.environ['APP_URL']}/static/{upload_type}/{proper_file_name}"
+        if ENVIRONMENT == 'local':
+            file_uploaded_url = f"{os.environ['APP_URL']}/static/{upload_type}/{proper_file_name}"
+        elif ENVIRONMENT == 'production':
+            file_uploaded_url = f"{os.environ['APP_URL']}/static/static/{upload_type}/{proper_file_name}"
 
         data = {
             "status": "success",

@@ -22,6 +22,7 @@ from apps.utils.tasks import send_email
 import random
 import string
 from rest_framework.decorators import action
+from django.db.models import Q
 
 LOOKUP_REGEX = '[0-9a-f-]{36}'
 
@@ -642,9 +643,15 @@ class CustomerViewSet(viewsets.ModelViewSet):
         commission_from_date = request.query_params.get('commission_from_date', None)
         commission_to_date = request.query_params.get('commission_to_date', None)
 
-        customer = Z2HCustomers.objects.all()
+        customer_within_commission_dates = Z2HCustomers.objects.filter(
+            Q(commission_date__gte=commission_from_date) & Q(commission_date__lte=commission_to_date)
+        )
 
-        commission_data = Z2HCommissionSerializer(customer, many=True).data
+        level_one_commission_not_paid_customers = customer_within_commission_dates.filter(
+            Q(is_level_completed=True) & Q(is_commission_paid=False)
+        )
+
+        commission_data = Z2HCommissionSerializer(customer_within_commission_dates, many=True).data
 
         data = {
             "status": "success",
