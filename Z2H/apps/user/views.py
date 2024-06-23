@@ -23,6 +23,8 @@ import random
 import string
 from rest_framework.decorators import action
 from django.db.models import Q
+from django.utils import timezone
+from django.utils.dateparse import parse_date
 
 LOOKUP_REGEX = '[0-9a-f-]{36}'
 
@@ -647,15 +649,55 @@ class CustomerViewSet(viewsets.ModelViewSet):
         commission_from_date = request.query_params.get('commission_from_date', None)
         commission_to_date = request.query_params.get('commission_to_date', None)
 
-        customer_within_commission_dates = Z2HCustomers.objects.filter(
-            Q(commission_date__gte=commission_from_date) & Q(commission_date__lte=commission_to_date)
+        if commission_from_date:
+            commission_from_date = timezone.make_aware(
+                timezone.datetime.combine(parse_date(commission_from_date), timezone.datetime.min.time())
+            )
+        if commission_to_date:
+            commission_to_date = timezone.make_aware(
+                timezone.datetime.combine(parse_date(commission_to_date), timezone.datetime.max.time())
+            )
+
+        customers_not_got_paid_for_level_one_completion_within_dates = Z2HCustomers.objects.exclude(is_admin_user=True).filter(
+            Q(level_one_completed_date__gte=commission_from_date) & Q(level_one_completed_date__lte=commission_to_date)
         )
 
-        level_one_commission_not_paid_customers = customer_within_commission_dates.filter(
-            Q(is_level_completed=True) & Q(is_commission_paid=False)
+        customers_not_got_paid_for_level_two_completion_within_dates = Z2HCustomers.objects.exclude(is_admin_user=True).filter(
+            Q(level_two_completed_date__gte=commission_from_date) & Q(level_two_completed_date__lte=commission_to_date)
         )
 
-        commission_data = Z2HCommissionSerializer(customer_within_commission_dates, many=True).data
+        customers_not_got_paid_for_level_three_completion_within_dates = Z2HCustomers.objects.exclude(is_admin_user=True).filter(
+            Q(level_three_completed_date__gte=commission_from_date) & Q(level_three_completed_date__lte=commission_to_date)
+        )
+
+        customers_not_got_paid_for_level_four_completion_within_dates = Z2HCustomers.objects.exclude(is_admin_user=True).filter(
+            Q(level_four_completed_date__gte=commission_from_date) & Q(level_four_completed_date__lte=commission_to_date)
+        )
+
+        customers_not_got_paid_for_level_one_completion = customers_not_got_paid_for_level_one_completion_within_dates.filter(
+            Q(is_level_one_completed=True) & Q(is_level_one_commission_paid=False)
+        )
+
+        customers_not_got_paid_for_level_two_completion = customers_not_got_paid_for_level_two_completion_within_dates.filter(
+            Q(is_level_two_completed=True) & Q(is_level_two_commission_paid=False)
+        )
+
+        customers_not_got_paid_for_level_three_completion = customers_not_got_paid_for_level_three_completion_within_dates.filter(
+            Q(is_level_three_completed=True) & Q(is_level_three_commission_paid=False)
+        )
+
+        customers_not_got_paid_for_level_four_completion = customers_not_got_paid_for_level_four_completion_within_dates.filter(
+            Q(is_level_four_completed=True) & Q(is_level_four_commission_paid=False)
+        )
+
+        customers_not_got_paid_for_completed_levels = (
+            customers_not_got_paid_for_level_one_completion | 
+            customers_not_got_paid_for_level_two_completion | 
+            customers_not_got_paid_for_level_three_completion | 
+            customers_not_got_paid_for_level_four_completion
+        )
+
+        commission_data = Z2HCommissionSerializer(customers_not_got_paid_for_completed_levels, many=True).data
 
         data = {
             "status": "success",

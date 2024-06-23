@@ -13,9 +13,10 @@ class ReferrerLimitPermission(permissions.BasePermission):
             return False
         
         customer = Z2HCustomers.objects.filter(customer_number=referred_by).first()
+
         if not customer:
             return False
         
-        return RegisterUser.objects.filter(referred_by=customer.referrer).exclude(
+        return RegisterUser.objects.filter(referred_by=customer).exclude(
             is_admin_user=True
         ).count() < int(os.environ["PRIMARY_LEG_COUNT"])
