@@ -8,9 +8,15 @@ class Z2HWebPages(ZeroToHeroBaseModel):
     name = models.CharField(max_length=64, null=False, blank=False)
     description = models.TextField(null=True, blank=True)
 
+    def __str__(self):
+        return self.name
+
 class Z2HWebPageRoles(ZeroToHeroBaseModel):
     role_uid = models.CharField(max_length=64, null=False, blank=False)
     web_page_uid = models.CharField(max_length=64, null=False, blank=False)
+
+    def __str__(self):
+        return f"{self.role_uid} - {self.web_page_uid}"
 
 class Z2HPlanDetails(ZeroToHeroBaseModel):
     name = models.CharField(max_length=64, null=True, blank=True)
@@ -36,21 +42,33 @@ class Z2HPlanDetails(ZeroToHeroBaseModel):
     level_four_flat_value = models.DecimalField(max_digits=13, decimal_places=2, null=True, blank=True)
     registration_fee = models.DecimalField(max_digits=13, decimal_places=2, null=True, blank=True)
 
+    def __str__(self):
+        return self.name
+
 class Z2HAdvertisements(ZeroToHeroBaseModel):
     name = models.CharField(max_length=64, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     data = models.JSONField(default=dict)
+
+    def __str__(self):
+        return self.name
 
 class Z2HProductCategories(ZeroToHeroBaseModel):
     name = models.CharField(max_length=64, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     category_code = models.CharField(max_length=64, null=True, blank=True)
 
+    def __str__(self):
+        return self.name
+
 class Z2HProductSubCategories(ZeroToHeroBaseModel):
     name = models.CharField(max_length=64, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     category = models.ForeignKey(Z2HProductCategories, on_delete=models.CASCADE, null=True, blank=True)
     sub_category_code = models.CharField(max_length=64, null=True, blank=True)
+
+    def __str__(self):
+        return self.name
 
 class Z2HProducts(ZeroToHeroBaseModel):
     product_code = models.CharField(max_length=64, null=True, blank=True)
@@ -66,9 +84,15 @@ class Z2HProducts(ZeroToHeroBaseModel):
     offer_price = models.DecimalField(max_digits=13, decimal_places=2, null=True, blank=True)
     plan = models.ForeignKey(Z2HPlanDetails, on_delete=models.CASCADE, null=True, blank=True)
 
+    def __str__(self):
+        return f"{self.name} - {self.uid}"
+
 class Z2HProductImages(ZeroToHeroBaseModel):
     product_image_url = models.CharField(max_length=256, null=True, blank=True)
     product = models.ForeignKey(Z2HProducts, on_delete=models.CASCADE, null=True, blank=True)
+
+    def __str__(self):
+        return self.product_image_url
 
 class Z2HOrders(ZeroToHeroBaseModel):
     ORDER_TYPE_CHOICES = (
@@ -99,6 +123,9 @@ class Z2HOrders(ZeroToHeroBaseModel):
     delivery_details = models.JSONField(default=dict, null=True, blank=True)
     payment_details = models.JSONField(default=dict, null=True, blank=True)
 
+    def __str__(self):
+        return self.order_number
+
 class Z2HOrderItems(ZeroToHeroBaseModel):
     order = models.ForeignKey(Z2HOrders, on_delete=models.CASCADE, null=True, blank=True)
     product = models.ForeignKey(Z2HProducts, on_delete=models.CASCADE, null=True, blank=True)
@@ -115,6 +142,9 @@ class Z2HOrderItems(ZeroToHeroBaseModel):
     gst_total_amount = models.DecimalField(max_digits=13, decimal_places=2, null=True, blank=True)
     total_amount = models.DecimalField(max_digits=13, decimal_places=2, null=True, blank=True)
 
+    def __str__(self):
+        return self.order_item_number
+
 class Z2HProductsReturned(ZeroToHeroBaseModel):
     product_id = models.CharField(max_length=64, null=True, blank=True)
     customer_id = models.CharField(max_length=64, null=True, blank=True)
@@ -122,3 +152,6 @@ class Z2HProductsReturned(ZeroToHeroBaseModel):
     mobile_number = models.CharField(max_length=20, null=True, blank=True)
     product_returned_date = models.DateTimeField(null=True, blank=True)
     comments = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.product_id} - {self.customer_name}"

@@ -88,6 +88,9 @@ class Z2HCustomers(ZeroToHeroBaseModel):
     level_three_commission_paid_date = models.DateTimeField(null=True, blank=True)
     level_four_commission_paid_date = models.DateTimeField(null=True, blank=True)
 
+    def __str__(self):
+        return self.customer_number
+
 class RegisterUser(ZeroToHeroBaseModel):
 
     MARITAL_CHOICES = (
