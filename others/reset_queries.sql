@@ -1,15 +1,14 @@
 delete from public.user_registeruser where id > 1;
-delete from public.user_z2hcustomers where id > 1;
 delete from public.app_z2horderitems where id > 0;
 delete from public.app_z2horders where id > 0;
+delete from public.user_z2hcustomers where id > 1;
 delete from public.authtoken_token where user_id > 1;
 delete from public.user_z2huser where id > 1;
-delete from public.app_z2hproducts where id > 0;
 delete from public.app_z2hproductimages where id > 0;
 delete from public.app_z2hproductsubcategories where id > 0;
 delete from public.app_z2hproductcategories where id > 0;
 delete from public.app_z2hproductsreturned where id > 0;
-
+delete from public.app_z2hproducts where id > 0;
 
 alter sequence user_registeruser_id_seq restart with 2;
 alter sequence user_z2hcustomers_id_seq restart with 2;
