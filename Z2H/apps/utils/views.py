@@ -63,7 +63,7 @@ class UploadImageView(APIView):
                 if ENVIRONMENT == 'local':
                     file_uploaded_url = f"{os.environ['APP_URL']}/static/{upload_type}/{proper_file_name}"
                 elif ENVIRONMENT == 'production':
-                    file_uploaded_url = f"{os.environ['APP_URL']}/static/static/{upload_type}/{proper_file_name}"
+                    file_uploaded_url = f"{os.environ['APP_URL']}/static_image/{upload_type}/{proper_file_name}"
 
                 file_uploaded_urls.append(file_uploaded_url)
         
