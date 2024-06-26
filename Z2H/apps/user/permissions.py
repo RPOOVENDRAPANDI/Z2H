@@ -19,4 +19,4 @@ class ReferrerLimitPermission(permissions.BasePermission):
         
         return RegisterUser.objects.filter(referred_by=customer).exclude(
             is_admin_user=True
-        ).count() < int(os.environ["PRIMARY_LEG_COUNT"])
+        ).count() <= int(os.environ["PRIMARY_LEG_COUNT"])
