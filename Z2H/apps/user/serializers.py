@@ -8,6 +8,7 @@ from .models import RegisterUser, Z2HUser, Role, Z2HCustomers
 from apps.app.models import Z2HPlanDetails, Z2HOrders
 from apps.app.serializers import Z2HOrderSerializer
 import os
+from datetime import datetime
 
 PRIMARY_LEG_COUNT = int(os.environ.get('PRIMARY_LEG_COUNT'))
 SECONDARY_LEG_COUNT = PRIMARY_LEG_COUNT * PRIMARY_LEG_COUNT
@@ -370,6 +371,227 @@ class CustomerSerializer(serializers.ModelSerializer):
         return "Inactive"
     
 class Z2HCommissionSerializer(serializers.ModelSerializer):
+    customer_name = serializers.SerializerMethodField()
+    mobile_number = serializers.SerializerMethodField()
+    name_of_bank = serializers.SerializerMethodField()
+    account_number = serializers.SerializerMethodField()
+    ifsc_code = serializers.SerializerMethodField()
+    pan = serializers.SerializerMethodField()
+    plan = serializers.SerializerMethodField()
+    registration_fee = serializers.SerializerMethodField()
+    commission_from_date = serializers.SerializerMethodField()
+    commission_to_date = serializers.SerializerMethodField()
+    level_one_completion_status = serializers.SerializerMethodField()
+    level_one_completion_date = serializers.SerializerMethodField()
+    level_one_commission_amount = serializers.SerializerMethodField()
+    level_one_tds_amount = serializers.SerializerMethodField()
+    level_one_amount_payable = serializers.SerializerMethodField()
+    level_one_commission_paid_status = serializers.SerializerMethodField()
+    level_one_commission_paid_date = serializers.SerializerMethodField()
+    level_one_payment_comments = serializers.SerializerMethodField()
+    level_two_completion_status = serializers.SerializerMethodField()
+    level_two_completion_date = serializers.SerializerMethodField()
+    level_two_commission_amount = serializers.SerializerMethodField()
+    level_two_tds_amount = serializers.SerializerMethodField()
+    level_two_amount_payable = serializers.SerializerMethodField()
+    level_two_commission_paid_status = serializers.SerializerMethodField()
+    level_two_commission_paid_date = serializers.SerializerMethodField()
+    level_two_payment_comments = serializers.SerializerMethodField()
+    level_three_completion_status = serializers.SerializerMethodField()
+    level_three_completion_date = serializers.SerializerMethodField()
+    level_three_commission_amount = serializers.SerializerMethodField()
+    level_three_tds_amount = serializers.SerializerMethodField()
+    level_three_amount_payable = serializers.SerializerMethodField()
+    level_three_commission_paid_status = serializers.SerializerMethodField()
+    level_three_commission_paid_date = serializers.SerializerMethodField()
+    level_three_payment_comments = serializers.SerializerMethodField()
+    level_four_completion_status = serializers.SerializerMethodField()
+    level_four_completion_date = serializers.SerializerMethodField()
+    level_four_commission_amount = serializers.SerializerMethodField()
+    level_four_tds_amount = serializers.SerializerMethodField()
+    level_four_amount_payable = serializers.SerializerMethodField()
+    level_four_commission_paid_status = serializers.SerializerMethodField()
+    level_four_commission_paid_date = serializers.SerializerMethodField()
+    level_four_payment_comments = serializers.SerializerMethodField()
+
     class Meta:
         model = Z2HCustomers
         fields = '__all__'
+
+    def get_customer_name(self, obj):
+        return obj.user.name
+    
+    def get_mobile_number(self, obj):
+        return RegisterUser.objects.get(user_id=obj.user_id).mobile_number
+    
+    def get_name_of_bank(self, obj):
+        return RegisterUser.objects.get(user_id=obj.user_id).name_of_bank
+    
+    def get_account_number(self, obj):
+        return RegisterUser.objects.get(user_id=obj.user_id).account_number
+    
+    def get_ifsc_code(self, obj):
+        ifsc_code = RegisterUser.objects.get(user_id=obj.user_id).ifsc_code
+        return ifsc_code.upper() if ifsc_code else ""
+    
+    def get_pan(self, obj):
+        pan = RegisterUser.objects.get(user_id=obj.user_id).pan
+        return pan.upper() if pan else ""
+    
+    def get_plan(self, obj):
+        return Z2HPlanDetails.objects.filter(uid=obj.active_plan_uid).first().name
+    
+    def get_registration_fee(self, obj):
+        return Z2HPlanDetails.objects.filter(uid=obj.active_plan_uid).first().registration_fee
+    
+    def get_commission_from_date(self, obj):
+        commission_from_date = self.context['request'].query_params.get('commission_from_date', None)
+        return datetime.strptime(commission_from_date, "%Y-%m-%d").strftime("%d-%m-%Y") if commission_from_date else None
+    
+    def get_commission_to_date(self, obj):
+        commission_to_date = self.context['request'].query_params.get('commission_to_date', None)
+        return datetime.strptime(commission_to_date, "%Y-%m-%d").strftime("%d-%m-%Y") if commission_to_date else None
+    
+    def get_level_one_completion_status(self, obj):
+        if obj.is_level_one_completed:
+            return COMPLETED
+
+        return INPROGRESS
+    
+    def get_level_one_completion_date(self, obj):
+        return obj.level_one_completed_date.strftime("%d-%m-%Y") if obj.level_one_completed_date else None
+    
+    def get_level_one_commission_amount(self, obj):
+        level_one_amount = Z2HPlanDetails.objects.filter(uid=obj.active_plan_uid).first().level_one_amount
+        return float("{:.2f}".format(level_one_amount)) if level_one_amount else 0.0
+    
+    def get_level_one_tds_amount(self, obj):
+        level_one_commission_amount = self.get_level_one_commission_amount(obj)
+        level_one_tds_amount = (level_one_commission_amount * 10) / 100
+        return float("{:.2f}".format(level_one_tds_amount))
+    
+    def get_level_one_amount_payable(self, obj):
+        level_one_commission_amount = self.get_level_one_commission_amount(obj)
+        level_one_tds_amount = self.get_level_one_tds_amount(obj)
+        level_one_amount_payable = level_one_commission_amount - level_one_tds_amount
+        return float("{:.2f}".format(level_one_amount_payable))
+    
+    def get_level_one_commission_paid_status(self, obj):
+        if obj.is_level_one_commission_paid:
+            return PAID
+
+        return UNPAID
+    
+    def get_level_one_commission_paid_date(self, obj):
+        return obj.level_one_commission_paid_date.strftime("%d-%m-%Y") if obj.level_one_commission_paid_date else None
+    
+    def get_level_one_payment_comments(self, obj):
+        return obj.level_one_commission_details.get('comments', None)
+    
+    def get_level_two_completion_status(self, obj):
+        if obj.is_level_two_completed:
+            return COMPLETED
+
+        return INPROGRESS
+    
+    def get_level_two_completion_date(self, obj):
+        return obj.level_two_completed_date.strftime("%d-%m-%Y") if obj.level_two_completed_date else None
+    
+    def get_level_two_commission_amount(self, obj):
+        level_two_amount = Z2HPlanDetails.objects.filter(uid=obj.active_plan_uid).first().level_two_amount
+        return float("{:.2f}".format(level_two_amount)) if level_two_amount else 0.0
+    
+    def get_level_two_tds_amount(self, obj):
+        level_two_commission_amount = self.get_level_two_commission_amount(obj)
+        level_two_tds_amount = (level_two_commission_amount * 10) / 100
+        return float("{:.2f}".format(level_two_tds_amount))
+    
+    def get_level_two_amount_payable(self, obj):
+        level_two_commission_amount = self.get_level_two_commission_amount(obj)
+        level_two_tds_amount = self.get_level_two_tds_amount(obj)
+        level_two_amount_payable = level_two_commission_amount - level_two_tds_amount
+        return float("{:.2f}".format(level_two_amount_payable))
+
+    def get_level_two_commission_paid_status(self, obj):
+        if obj.is_level_two_commission_paid:
+            return PAID
+
+        return UNPAID
+    
+    def get_level_two_commission_paid_date(self, obj):
+        return obj.level_two_commission_paid_date.strftime("%d-%m-%Y") if obj.level_two_commission_paid_date else None
+    
+    def get_level_two_payment_comments(self, obj):
+        return obj.level_two_commission_details.get('comments', None)
+    
+    def get_level_three_completion_status(self, obj):
+        if obj.is_level_three_completed:
+            return COMPLETED
+
+        return INPROGRESS
+    
+    def get_level_three_completion_date(self, obj):
+        return obj.level_three_completed_date.strftime("%d-%m-%Y") if obj.level_three_completed_date else None
+    
+    def get_level_three_commission_amount(self, obj):
+        level_three_amount = Z2HPlanDetails.objects.filter(uid=obj.active_plan_uid).first().level_three_amount
+        return float("{:.2f}".format(level_three_amount)) if level_three_amount else 0.0
+    
+    def get_level_three_tds_amount(self, obj):
+        level_three_commission_amount = self.get_level_three_commission_amount(obj)
+        level_three_tds_amount = (level_three_commission_amount * 10) / 100
+        return float("{:.2f}".format(level_three_tds_amount))
+    
+    def get_level_three_amount_payable(self, obj):
+        level_three_commission_amount = self.get_level_three_commission_amount(obj)
+        level_three_tds_amount = self.get_level_three_tds_amount(obj)
+        level_three_amount_payable = level_three_commission_amount - level_three_tds_amount
+        return float("{:.2f}".format(level_three_amount_payable))
+
+    def get_level_three_commission_paid_status(self, obj):
+        if obj.is_level_three_commission_paid:
+            return PAID
+
+        return UNPAID
+    
+    def get_level_three_commission_paid_date(self, obj):
+        return obj.level_three_commission_paid_date.strftime("%d-%m-%Y") if obj.level_three_commission_paid_date else None
+    
+    def get_level_three_payment_comments(self, obj):
+        return obj.level_three_commission_details.get('comments', None)
+    
+    def get_level_four_completion_status(self, obj):
+        if obj.is_level_four_completed:
+            return COMPLETED
+
+        return INPROGRESS
+    
+    def get_level_four_completion_date(self, obj):
+        return obj.level_four_completed_date.strftime("%d-%m-%Y") if obj.level_four_completed_date else None
+    
+    def get_level_four_commission_amount(self, obj):
+        level_four_amount = Z2HPlanDetails.objects.filter(uid=obj.active_plan_uid).first().level_four_amount
+        return float("{:.2f}".format(level_four_amount)) if level_four_amount else 0.0
+    
+    def get_level_four_tds_amount(self, obj):
+        level_four_commission_amount = self.get_level_four_commission_amount(obj)
+        level_four_tds_amount = (level_four_commission_amount * 10) / 100
+        return float("{:.2f}".format(level_four_tds_amount))
+    
+    def get_level_four_amount_payable(self, obj):
+        level_four_commission_amount = self.get_level_four_commission_amount(obj)
+        level_four_tds_amount = self.get_level_four_tds_amount(obj)
+        level_four_amount_payable = level_four_commission_amount - level_four_tds_amount
+        return float("{:.2f}".format(level_four_amount_payable))
+
+    def get_level_four_commission_paid_status(self, obj):
+        if obj.is_level_four_commission_paid:
+            return PAID
+
+        return UNPAID
+    
+    def get_level_four_commission_paid_date(self, obj):
+        return obj.level_four_commission_paid_date.strftime("%d-%m-%Y") if obj.level_four_commission_paid_date else None
+    
+    def get_level_four_payment_comments(self, obj):
+        return obj.level_four_commission_details.get('comments', None)

@@ -930,7 +930,7 @@ class CustomerViewSet(viewsets.ModelViewSet):
         commission_status = request.query_params.get('commission_status', None)
         commission_level = request.query_params.get('commission_level', None)
         
-        unpaid_status = 'Un Paid'
+        unpaid_status = 'Unpaid'
         paid_status = 'Paid'
         all_status = 'All'
 
@@ -958,7 +958,9 @@ class CustomerViewSet(viewsets.ModelViewSet):
                 commission_level, commission_from_date, commission_to_date
             )
 
-        commission_data = Z2HCommissionSerializer(commission_queryset, many=True).data
+        commission_queryset_ordered = commission_queryset.order_by('id')
+
+        commission_data = Z2HCommissionSerializer(commission_queryset_ordered, many=True, context={'request': request}).data
 
         data = {
             "status": "success",
