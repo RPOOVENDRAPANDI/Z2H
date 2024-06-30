@@ -17,7 +17,10 @@ QUATERNARY_LEG_COUNT = TERTIARY_LEG_COUNT * PRIMARY_LEG_COUNT
 INPROGRESS = 'In Progress'
 COMPLETED = 'Completed'
 PAID = 'Paid'
-UNPAID = 'Unpaid'
+UNPAID = 'Yet to be paid'
+PAYMENT_ISSUE = 'Payment Issue'
+ACTIVE = 'Active'
+INACTIVE = 'Inactive'
 
 class UserSerializer(serializers.ModelSerializer):
 
@@ -413,6 +416,7 @@ class Z2HCommissionSerializer(serializers.ModelSerializer):
     level_four_commission_paid_status = serializers.SerializerMethodField()
     level_four_commission_paid_date = serializers.SerializerMethodField()
     level_four_payment_comments = serializers.SerializerMethodField()
+    user_status = serializers.SerializerMethodField()
 
     class Meta:
         model = Z2HCustomers
@@ -477,6 +481,9 @@ class Z2HCommissionSerializer(serializers.ModelSerializer):
         return float("{:.2f}".format(level_one_amount_payable))
     
     def get_level_one_commission_paid_status(self, obj):
+        if obj.is_level_one_payment_issue:
+            return PAYMENT_ISSUE
+        
         if obj.is_level_one_commission_paid:
             return PAID
 
@@ -486,7 +493,7 @@ class Z2HCommissionSerializer(serializers.ModelSerializer):
         return obj.level_one_commission_paid_date.strftime("%d-%m-%Y") if obj.level_one_commission_paid_date else None
     
     def get_level_one_payment_comments(self, obj):
-        return obj.level_one_commission_details.get('comments', None)
+        return dict(obj.level_one_commission_details).get('comments', None)
     
     def get_level_two_completion_status(self, obj):
         if obj.is_level_two_completed:
@@ -522,7 +529,7 @@ class Z2HCommissionSerializer(serializers.ModelSerializer):
         return obj.level_two_commission_paid_date.strftime("%d-%m-%Y") if obj.level_two_commission_paid_date else None
     
     def get_level_two_payment_comments(self, obj):
-        return obj.level_two_commission_details.get('comments', None)
+        return dict(obj.level_two_commission_details).get('comments', None)
     
     def get_level_three_completion_status(self, obj):
         if obj.is_level_three_completed:
@@ -558,7 +565,7 @@ class Z2HCommissionSerializer(serializers.ModelSerializer):
         return obj.level_three_commission_paid_date.strftime("%d-%m-%Y") if obj.level_three_commission_paid_date else None
     
     def get_level_three_payment_comments(self, obj):
-        return obj.level_three_commission_details.get('comments', None)
+        return dict(obj.level_three_commission_details).get('comments', None)
     
     def get_level_four_completion_status(self, obj):
         if obj.is_level_four_completed:
@@ -594,4 +601,10 @@ class Z2HCommissionSerializer(serializers.ModelSerializer):
         return obj.level_four_commission_paid_date.strftime("%d-%m-%Y") if obj.level_four_commission_paid_date else None
     
     def get_level_four_payment_comments(self, obj):
-        return obj.level_four_commission_details.get('comments', None)
+        return dict(obj.level_four_commission_details).get('comments', None)
+    
+    def get_user_status(self, obj):
+        if obj.user.is_active:
+            return ACTIVE
+        
+        return INACTIVE

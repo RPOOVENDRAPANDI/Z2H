@@ -677,6 +677,17 @@ class CustomerViewSet(viewsets.ModelViewSet):
 
         return customers_for_level_one_completion
     
+    def get_level_one_customers_with_issue_in_payments(self, commission_from_date, commission_to_date):
+        customers_for_level_one_completion_within_dates = Z2HCustomers.objects.exclude(is_admin_user=True).filter(
+            Q(level_one_completed_date__gte=commission_from_date) & Q(level_one_completed_date__lte=commission_to_date)
+        )
+
+        customers_for_level_one_completion = customers_for_level_one_completion_within_dates.filter(
+            Q(is_level_one_completed=True) & Q(is_level_one_payment_issue=True)
+        )
+
+        return customers_for_level_one_completion
+    
     def get_level_two_customers_not_got_paid_commission(self, commission_from_date, commission_to_date):
         customers_not_got_paid_for_level_two_completion_within_dates = Z2HCustomers.objects.exclude(is_admin_user=True).filter(
             Q(level_two_completed_date__gte=commission_from_date) & Q(level_two_completed_date__lte=commission_to_date)
@@ -706,6 +717,17 @@ class CustomerViewSet(viewsets.ModelViewSet):
 
         customers_for_level_two_completion = customers_for_level_two_completion_within_dates.filter(
             Q(is_level_two_completed=True)
+        )
+
+        return customers_for_level_two_completion
+    
+    def get_level_two_customers_with_issue_in_payments(self, commission_from_date, commission_to_date):
+        customers_for_level_two_completion_within_dates = Z2HCustomers.objects.exclude(is_admin_user=True).filter(
+            Q(level_two_completed_date__gte=commission_from_date) & Q(level_two_completed_date__lte=commission_to_date)
+        )
+
+        customers_for_level_two_completion = customers_for_level_two_completion_within_dates.filter(
+            Q(is_level_two_completed=True) & Q(is_level_two_payment_issue=True)
         )
 
         return customers_for_level_two_completion
@@ -743,6 +765,17 @@ class CustomerViewSet(viewsets.ModelViewSet):
 
         return customers_for_level_three_completion
     
+    def get_level_three_customers_with_issue_in_payments(self, commission_from_date, commission_to_date):
+        customers_for_level_three_completion_within_dates = Z2HCustomers.objects.exclude(is_admin_user=True).filter(
+            Q(level_three_completed_date__gte=commission_from_date) & Q(level_three_completed_date__lte=commission_to_date)
+        )
+
+        customers_for_level_three_completion = customers_for_level_three_completion_within_dates.filter(
+            Q(is_level_three_completed=True) & Q(is_level_three_payment_issue=True)
+        )
+
+        return customers_for_level_three_completion
+    
     def get_level_four_customers_not_got_paid_commission(self, commission_from_date, commission_to_date):
         customers_not_got_paid_for_level_four_completion_within_dates = Z2HCustomers.objects.exclude(is_admin_user=True).filter(
             Q(level_four_completed_date__gte=commission_from_date) & Q(level_four_completed_date__lte=commission_to_date)
@@ -772,6 +805,17 @@ class CustomerViewSet(viewsets.ModelViewSet):
 
         customers_for_level_four_completion = customers_for_level_four_completion_within_dates.filter(
             Q(is_level_four_completed=True)
+        )
+
+        return customers_for_level_four_completion
+    
+    def get_level_four_customers_with_issue_in_payments(self, commission_from_date, commission_to_date):
+        customers_for_level_four_completion_within_dates = Z2HCustomers.objects.exclude(is_admin_user=True).filter(
+            Q(level_four_completed_date__gte=commission_from_date) & Q(level_four_completed_date__lte=commission_to_date)
+        )
+
+        customers_for_level_four_completion = customers_for_level_four_completion_within_dates.filter(
+            Q(is_level_four_completed=True) & Q(is_level_four_payment_issue=True)
         )
 
         return customers_for_level_four_completion
@@ -832,6 +876,27 @@ class CustomerViewSet(viewsets.ModelViewSet):
         )
 
         fourth_level = self.get_level_four_customers_commission(
+            commission_from_date, commission_to_date
+        )
+
+        commission_queryset = first_level | second_level | third_level | fourth_level
+
+        return commission_queryset
+    
+    def get_all_customers_with_issue_in_payments(self, commission_from_date, commission_to_date):
+        first_level = self.get_level_one_customers_with_issue_in_payments(
+            commission_from_date, commission_to_date
+        )
+
+        second_level = self.get_level_two_customers_with_issue_in_payments(
+            commission_from_date, commission_to_date
+        )
+
+        third_level = self.get_level_three_customers_with_issue_in_payments(
+            commission_from_date, commission_to_date
+        )
+
+        fourth_level = self.get_level_four_customers_with_issue_in_payments(
             commission_from_date, commission_to_date
         )
 
@@ -923,6 +988,34 @@ class CustomerViewSet(viewsets.ModelViewSet):
 
         return commission_queryset
     
+    def get_queryset_for_issue_with_payments(self, commission_level, commission_from_date, commission_to_date):
+        if commission_level == 'One':
+            commission_queryset = self.get_level_one_customers_with_issue_in_payments(
+                commission_from_date, commission_to_date
+            )
+
+        if commission_level == 'Two':
+            commission_queryset = self.get_level_two_customers_with_issue_in_payments(
+                commission_from_date, commission_to_date
+            )
+
+        if commission_level == 'Three':
+            commission_queryset = self.get_level_three_customers_with_issue_in_payments(
+                commission_from_date, commission_to_date
+            )
+
+        if commission_level == 'Four':
+            commission_queryset = self.get_level_four_customers_with_issue_in_payments(
+                commission_from_date, commission_to_date
+            )
+
+        if commission_level == 'All':
+            commission_queryset = self.get_all_customers_with_issue_in_payments(
+                commission_from_date, commission_to_date
+            )
+
+        return commission_queryset
+    
     @action(detail=False, methods=['GET', ], url_path="commission_details", url_name="commission-details")
     def get_commission_details(self, request, *args, **kwargs):
         commission_from_date = request.query_params.get('commission_from_date', None)
@@ -930,8 +1023,9 @@ class CustomerViewSet(viewsets.ModelViewSet):
         commission_status = request.query_params.get('commission_status', None)
         commission_level = request.query_params.get('commission_level', None)
         
-        unpaid_status = 'Unpaid'
+        unpaid_status = 'Yet to be paid'
         paid_status = 'Paid'
+        payment_issue = 'Issue with payments'
         all_status = 'All'
 
         if commission_from_date:
@@ -958,6 +1052,11 @@ class CustomerViewSet(viewsets.ModelViewSet):
                 commission_level, commission_from_date, commission_to_date
             )
 
+        if commission_status == payment_issue:
+            commission_queryset = self.get_queryset_for_issue_with_payments(
+                commission_level, commission_from_date, commission_to_date
+            )
+
         commission_queryset_ordered = commission_queryset.order_by('id')
 
         commission_data = Z2HCommissionSerializer(commission_queryset_ordered, many=True, context={'request': request}).data
@@ -966,6 +1065,61 @@ class CustomerViewSet(viewsets.ModelViewSet):
             "status": "success",
             "message": "Commission Details Fetched Successfully!!!",
             "commissions": commission_data,
+        }
+
+        return Response(data=data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['PATCH', ], url_path="update_commission_details", url_name="update-commission-details")
+    def update_commission_details(self, request, *args, **kwargs):
+        commission_level = request.data["commissionLevel"]
+        commission_pay_date = request.data["commissionPayDate"]
+        commission_status = request.data["commissionStatus"]
+        comments = request.data["comments"]
+        customer_number = request.data["customerNumber"]
+
+        customer = Z2HCustomers.objects.get(customer_number=customer_number)
+
+        if commission_level == "One":
+            customer.level_one_commission_paid_date = commission_pay_date
+            customer.level_one_commission_details["comments"] = comments
+        elif commission_level == "Two":
+            customer.level_two_commission_paid_date = commission_pay_date
+            customer.level_two_commission_details["comments"] = comments
+        elif commission_level == "Three":
+            customer.level_three_commission_paid_date = commission_pay_date
+            customer.level_three_commission_details["comments"] = comments
+        elif commission_level == "Four":
+            customer.level_four_commission_paid_date = commission_pay_date
+            customer.level_four_commission_details["comments"] = comments
+
+        if commission_status == "paymentIssue":
+            if commission_level == "One":
+                customer.is_level_one_payment_issue = True
+            elif commission_level == "Two":
+                customer.is_level_two_payment_issue = True
+            elif commission_level == "Three":
+                customer.is_level_three_payment_issue = True
+            elif commission_level == "Four":
+                customer.is_level_four_payment_issue = True
+        elif commission_status == "paid":
+            if commission_level == "One":
+                customer.is_level_one_commission_paid = True
+                customer.is_level_one_payment_issue = False
+            elif commission_level == "Two":
+                customer.is_level_two_commission_paid = True
+                customer.is_level_two_payment_issue = False
+            elif commission_level == "Three":
+                customer.is_level_three_commission_paid = True
+                customer.is_level_three_payment_issue = False
+            elif commission_level == "Four":
+                customer.is_level_four_commission_paid = True
+                customer.is_level_four_payment_issue = False
+            
+        customer.save()
+
+        data = {
+            "status": "success",
+            "message": "Commission Details Updated Successfully!!!",
         }
 
         return Response(data=data, status=status.HTTP_200_OK)
