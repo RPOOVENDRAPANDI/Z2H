@@ -14,6 +14,7 @@ from apps.user.serializers import (
     CustomerSerializer,
     UpdateRegisterUserDetailsSerializer,
     Z2HCommissionSerializer,
+    RegisterUserDetailsSerializer,
 )
 from apps.user.permissions import ReferrerLimitPermission
 from apps.user.models import Z2HUser, Z2HCustomers, Z2HUserRoles, Role, RegisterUser
@@ -590,6 +591,22 @@ class WebUserViewSet(viewsets.ModelViewSet):
         data['status'] = "error"
         data['message'] = serializer.errors
         return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=False, methods=['GET', ], url_path='registered_users', url_name='registered-users')
+    def get_registered_users(self, request, *args, **kwargs):
+        customers = Z2HCustomers.objects.all().values_list('user', flat=True)
+
+        register_user = RegisterUser.objects.exclude(
+            Q(user__id__in=list(customers))
+        ).filter(is_active=True, is_admin_user=False).order_by('id')
+
+        data = {
+            "status": "success",
+            "message": "Registered Users Fetched Successfully!!!",
+            "data": RegisterUserDetailsSerializer(register_user, many=True).data,
+        }
+
+        return Response(data=data, status=status.HTTP_200_OK)
 
 class CustomerViewSet(viewsets.ModelViewSet):
     authentication_classes = [authentication.TokenAuthentication]

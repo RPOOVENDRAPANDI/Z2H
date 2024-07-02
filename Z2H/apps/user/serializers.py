@@ -133,6 +133,48 @@ class UpdateRegisterUserDetailsSerializer(serializers.ModelSerializer):
             'name_of_bank', 'name_as_in_bank', 'ifsc_code', 'bank_branch', 'account_number', 'alternate_mobile_number',
             'profile_photo_path',
         ]
+
+class RegisterUserDetailsSerializer(serializers.ModelSerializer):
+    referrer_name = serializers.SerializerMethodField()
+    referrer_id = serializers.SerializerMethodField()
+    district = serializers.SerializerMethodField()
+    state = serializers.SerializerMethodField()
+    registered_date = serializers.SerializerMethodField()
+    date_of_birth = serializers.SerializerMethodField()
+    gender = serializers.SerializerMethodField()
+    nominee_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = RegisterUser
+        fields = '__all__'
+
+    def get_referrer(self, obj):
+        return Z2HCustomers.objects.filter(user_id=obj.referred_by.user).first()
+
+    def get_referrer_name(self, obj):
+        return obj.referred_by.user.name
+
+    def get_referrer_id(self, obj):
+        return self.get_referrer(obj).customer_number
+    
+    def get_district(self, obj):
+        return obj.district.name
+    
+    def get_state(self, obj):
+        return obj.district.state.name
+    
+    def get_registered_date(self, obj):
+        return obj.created.strftime("%d-%m-%Y")
+    
+    def get_date_of_birth(self, obj):
+        date_of_birth = RegisterUser.objects.get(user_id=obj.user_id).date_of_birth
+        return date_of_birth.strftime("%d-%m-%Y") if date_of_birth else ""
+    
+    def get_gender(self, obj):
+        return RegisterUser.objects.get(user_id=obj.user_id).gender.capitalize()
+    
+    def get_nominee_name(self, obj):
+        return RegisterUser.objects.get(user_id=obj.user_id).nominee_name
     
 class RoleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -209,7 +251,7 @@ class CustomerSerializer(serializers.ModelSerializer):
         return RegisterUser.objects.get(user_id=obj.user_id).mobile_number
     
     def get_nominee_name(self, obj):
-        return RegisterUser.objects.get(user_id=obj.user_id).nominee_name.capitalize()
+        return RegisterUser.objects.get(user_id=obj.user_id).nominee_name
     
     def get_aadhar_number(self, obj):
         return RegisterUser.objects.get(user_id=obj.user_id).aadhar_number
