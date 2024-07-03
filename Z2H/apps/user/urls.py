@@ -21,4 +21,5 @@ urlpatterns += [
     path('info/', views.GetUserInfoView.as_view(), name='user-info'),
     path('forgot_password/', views.ForgotPasswordView.as_view(), name='forgot-password'),
     path('update_register_user/', views.UpdateRegisterUderDetailsView.as_view(), name='update-register-user'),
+    path('dashborad_reports/', views.DashboardReportView.as_view(), name='dashboard-reports'),
 ]

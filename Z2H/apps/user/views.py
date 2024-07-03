@@ -18,7 +18,7 @@ from apps.user.serializers import (
 )
 from apps.user.permissions import ReferrerLimitPermission
 from apps.user.models import Z2HUser, Z2HCustomers, Z2HUserRoles, Role, RegisterUser
-from apps.app.models import Z2HWebPages, Z2HWebPageRoles
+from apps.app.models import Z2HWebPages, Z2HWebPageRoles, Z2HOrders
 from apps.utils.tasks import send_email
 import random
 import string
@@ -1137,6 +1137,53 @@ class CustomerViewSet(viewsets.ModelViewSet):
         data = {
             "status": "success",
             "message": "Commission Details Updated Successfully!!!",
+        }
+
+        return Response(data=data, status=status.HTTP_200_OK)
+    
+
+class DashboardReportView(APIView):
+    def get(self, request, *args, **kwargs):
+
+        orders = Z2HOrders.objects.all()
+
+        yet_to_be_couriered_orders_count = orders.filter(order_status="yet_to_be_couriered").count()
+        in_transit_orders_count = orders.filter(order_status="in_transit").count()
+        delivered_orders_count = orders.filter(order_status="delivered").count()
+        cancelled_orders_count = orders.filter(order_status="cancelled").count()
+
+        customers = Z2HCustomers.objects.all().values_list('user', flat=True)
+
+        register_user_count = RegisterUser.objects.exclude(
+            Q(user__id__in=list(customers))
+        ).filter(is_active=True, is_admin_user=False).count()
+
+        customers_level_one_commission_not_got_paid_count = Z2HCustomers.objects.exclude(is_admin_user=True).filter(
+            Q(is_level_one_completed=True) & Q(is_level_one_commission_paid=False)
+        ).count()
+
+        customer_level_two_commission_not_got_paid_count = Z2HCustomers.objects.exclude(is_admin_user=True).filter(
+            Q(is_level_two_completed=True) & Q(is_level_two_commission_paid=False)
+        ).count()
+
+        customer_level_three_commission_not_got_paid_count = Z2HCustomers.objects.exclude(is_admin_user=True).filter(
+            Q(is_level_three_completed=True) & Q(is_level_three_commission_paid=False)
+        ).count()
+
+        customer_level_four_commission_not_got_paid_count = Z2HCustomers.objects.exclude(is_admin_user=True).filter(
+            Q(is_level_four_completed=True) & Q(is_level_four_commission_paid=False)
+        ).count()
+
+        data = {
+            "yet_to_be_couriered_orders_count": yet_to_be_couriered_orders_count,
+            "in_transit_orders_count": in_transit_orders_count,
+            "delivered_orders_count": delivered_orders_count,
+            "cancelled_orders_count": cancelled_orders_count,
+            "register_user_count": register_user_count,
+            "customers_level_one_commission_not_got_paid_count": customers_level_one_commission_not_got_paid_count,
+            "customer_level_two_commission_not_got_paid_count": customer_level_two_commission_not_got_paid_count,
+            "customer_level_three_commission_not_got_paid_count": customer_level_three_commission_not_got_paid_count,
+            "customer_level_four_commission_not_got_paid_count": customer_level_four_commission_not_got_paid_count,
         }
 
         return Response(data=data, status=status.HTTP_200_OK)
