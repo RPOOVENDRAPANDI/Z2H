@@ -233,9 +233,11 @@ class Z2HOrdersViewSet(ModelViewSet):
             order_status = order_status.lower()
 
         if from_date and to_date:
+            if order_status == 'all':
+                return self.queryset.filter(order_date__range=[from_date, to_date])
             return self.queryset.filter(order_date__range=[from_date, to_date], order_status=order_status)
         
-        return self.queryset.filter(order_status=order_status)
+        return self.queryset
 
     def partial_update(self, request, *args, **kwargs):
         orders = Z2HOrders.objects.filter(uid=kwargs['uid']).first()
