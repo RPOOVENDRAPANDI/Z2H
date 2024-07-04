@@ -15,6 +15,7 @@ from apps.user.serializers import (
     UpdateRegisterUserDetailsSerializer,
     Z2HCommissionSerializer,
     RegisterUserDetailsSerializer,
+    CustomerNotGotDownlineSerializer,
 )
 from apps.user.permissions import ReferrerLimitPermission
 from apps.user.models import Z2HUser, Z2HCustomers, Z2HUserRoles, Role, RegisterUser
@@ -26,6 +27,7 @@ from rest_framework.decorators import action
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.dateparse import parse_date
+from datetime import timedelta
 
 LOOKUP_REGEX = '[0-9a-f-]{36}'
 
@@ -1187,3 +1189,18 @@ class DashboardReportView(APIView):
         }
 
         return Response(data=data, status=status.HTTP_200_OK)
+    
+class NoDownlineReportsView(APIView):
+    def get(self, request, *args, **kwargs):
+        customer = Z2HCustomers.objects.exclude(is_admin_user=True).values_list('id', flat=True)
+
+        customer_not_got_downline = Z2HCustomers.objects.exclude(
+            Q(customer__id__in=list(customer)) | Q(is_admin_user=True)
+        ).filter(plan_start_date__lte=timezone.now() - timedelta(days=10))
+
+        customer_not_got_downline_data = CustomerNotGotDownlineSerializer(customer_not_got_downline, many=True).data
+
+        return Response(data={
+            "customers_not_got_downline": customer_not_got_downline_data
+        }, status=status.HTTP_200_OK)
+

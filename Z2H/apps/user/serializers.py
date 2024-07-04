@@ -650,3 +650,46 @@ class Z2HCommissionSerializer(serializers.ModelSerializer):
             return ACTIVE
         
         return INACTIVE
+
+class CustomerNotGotDownlineSerializer(serializers.ModelSerializer):
+    customer_name = serializers.SerializerMethodField()
+    mobile_number = serializers.SerializerMethodField()
+    register_date = serializers.SerializerMethodField()
+    pending_days = serializers.SerializerMethodField()
+    mobile_number = serializers.SerializerMethodField()
+    referrer_id = serializers.SerializerMethodField()
+    referrer_name = serializers.SerializerMethodField()
+    referrer_mobile_number = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Z2HCustomers
+        fields = [
+            'customer_name', 'mobile_number', 'register_date', 'pending_days', 'customer_number', 'referrer_id', 'referrer_name',
+            'referrer_mobile_number',
+        ]
+    
+    def get_customer_name(self, obj):
+        return obj.user.name
+    
+    def get_mobile_number(self, obj):
+        return RegisterUser.objects.get(user_id=obj.user_id).mobile_number
+    
+    def get_register_date(self, obj):
+        return obj.plan_start_date.strftime("%d-%m-%Y")
+    
+    def get_pending_days(self, obj):
+        return (datetime.now().date() - obj.plan_start_date.date()).days
+    
+    def get_mobile_number(self, obj):
+        return RegisterUser.objects.get(user_id=obj.user_id).mobile_number
+    
+    def get_referrer_id(self, obj):
+        return obj.referrer.customer_number if obj.referrer else None
+    
+    def get_referrer_name(self, obj):
+        return obj.referrer.user.name if obj.referrer else None
+    
+    def get_referrer_mobile_number(self, obj):
+        return RegisterUser.objects.get(user_id=obj.referrer.user_id).mobile_number if obj.referrer else None
+
+    
