@@ -1,0 +1,274 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none;    /* Firefox */
+    -ms-user-select: none;     /* Internet Explorer/Edge */
+    user-select: none;         /* Non-prefixed version, currently supported by Chrome, Opera and Edge */
+    cursor: default;  
+}
+
+header {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: #f0f0f0;
+    z-index: 1; /* Ensure header is above carousel */
+    position: relative; /* Ensure z-index works */
+}
+
+header .logo img {
+    height: 80px;
+    width: 120px;
+}
+
+header .header-image img {
+    width: 100%;
+    height: 80px;
+    border-radius: 10px;
+}
+
+nav {
+    background-color: #6fd3fa;
+    position: relative;
+    z-index: 2; /* Ensure nav is above carousel */
+}
+
+.nav-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.nav-links li {
+    margin: 0;
+}
+
+.nav-links li a {
+    color: rgb(0, 0, 0);
+    text-decoration: none;
+    padding: 15px 20px;
+    display: block;
+}
+
+.nav-links li a:hover {
+    background-color: #3472f7;
+}
+
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 30px;
+    cursor: pointer;
+    padding: 15px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 3; /* Ensure toggle is above everything */
+}
+
+main {
+    padding: 20px;
+}
+
+.intro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.intro .about-us {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.products {
+    margin-bottom: 20px;
+}
+
+footer {
+    background-color: #f0f0f0;
+    padding: 20px;
+}
+
+footer .download-app {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+footer .footer-links {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    text-align: center;
+}
+
+footer .footer-links a {
+    text-decoration: none;
+    color: black;
+    margin: 5px 0;
+}
+
+footer .footer-links a:hover {
+    text-decoration: underline;
+}
+
+.carousel {
+    position: relative;
+    max-width: 100%;
+    margin: auto;
+    overflow: hidden;
+    z-index: 0; /* Ensure carousel is below everything */
+}
+
+.carousel-images {
+    display: flex;
+    transition: transform 1s ease-in-out;
+}
+
+.carousel-images img {
+    width: 100px;
+    height: 350px;
+    flex: 0 0 100%;
+}
+
+.prev, .next {
+    cursor: pointer;
+    position: absolute;
+    top: 50%;
+    width: auto;
+    padding: 16px;
+    margin-top: -22px;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    transition: 0.6s ease;
+    border-radius: 0 3px 3px 0;
+    user-select: none;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 1; /* Ensure buttons are above carousel */
+}
+
+.next {
+    right: 0;
+    border-radius: 3px 0 0 3px;
+}
+
+.prev:hover, .next:hover {
+    background-color: rgba(0,0,0,0.8);
+}
+
+@media (max-width: 767px) {
+    .menu-toggle {
+        display: block;
+    }
+
+    .nav-links {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        position: absolute;
+        top: 50px;
+        left: 0;
+        background-color: #6fd3fa;
+        z-index: 2; /* Ensure menu is above carousel */
+    }
+
+    .nav-links li {
+        text-align: center;
+    }
+
+    .nav-links.show {
+        display: flex;
+    }
+
+    header {
+        flex-direction: column;
+    }
+
+    footer .footer-links {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (min-width: 768px) {
+    .intro {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    .intro .about-us {
+        margin-top: 0;
+        text-align: left;
+        flex: 1;
+        margin-left: 20px;
+    }
+
+    nav ul {
+        flex-wrap: nowrap;
+    }
+}
+
+@media (min-width: 992px) {
+    header {
+        flex-direction: row;
+    }
+
+    header .logo {
+        flex: 0 0 auto;
+    }
+
+    header .header-image {
+        flex: 1;
+    }
+
+    .intro {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+
+    .intro .about-us {
+        flex: 2;
+        margin-left: 20px;
+    }
+
+    .products {
+        text-align: center;
+    }
+
+    footer .footer-links {
+        justify-content: space-between;
+    }
+}
+.download-app {
+    font-family: Arial, sans-serif;
+}
+
+.store-link {
+    text-decoration: none;
+    color: #000;
+    display: inline-flex;
+    align-items: center;
+    margin-right: 10px;
+}
+
+.store-icon {
+    width: 75px;
+    height: 40px;
+    margin-right: 10px;
+}
+.product-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content:space-evenly;
+}
+
+.card {
+    margin-top: 10px;
+}

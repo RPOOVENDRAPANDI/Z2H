@@ -71,10 +71,30 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'Z2H.urls'
 
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/4.2/howto/static-files/
+
+STATIC_URL = 'static/'
+
+STATIC_ROOT = os.path.join(BASE_DIR, "root")
+
+SITE_DIR = os.path.join(BASE_DIR, 'site')
+
+DIST_DIR = os.path.join(BASE_DIR, 'admin/dist/spa')
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+    SITE_DIR,
+    DIST_DIR,
+]
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            SITE_DIR,
+            DIST_DIR,
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -137,12 +157,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
-
-STATIC_URL = 'static/'
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
@@ -156,9 +170,3 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.TokenAuthentication",
     ]
 }
-
-STATIC_ROOT =os.path.join(BASE_DIR, "root")
-
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static')
-]

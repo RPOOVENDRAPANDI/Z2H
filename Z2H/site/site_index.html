@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Z2H</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"> 
+</head>
+<body>
+    <header class="d-flex align-items-center justify-content-between p-3">
+        <div class="logo">
+            <img src="/static/img/Logo2.png" alt="Logo">
+        </div>
+        <div class="header-image">
+            <img src="/static/img/earth7.png" alt="Blue earth from space" class="img-fluid">
+        </div>
+    </header>
+    
+    <nav>
+        <button class="menu-toggle" onclick="toggleMenu()">&#9776;</button>
+        <ul class="nav-links">
+            <li><a href="#">About Us</a></li>
+            <li><a href="#">Products</a></li>
+            <li><a href="#">Contact Us</a></li>
+            <li><a href="#">News & Events</a></li>
+            <li><a href="#">Photo Gallery</a></li>
+            <li><a href="#">FAQ</a></li>
+        </ul>
+    </nav>
+    <main>
+        <section class="intro">
+            <div class="carousel">
+                <div class="carousel-images">
+                    <img src="/static/img/slide_img/education.jpg" alt="Slide 1">
+                    <img src="/static/img/slide_img/hospital.jpg" alt="Slide 2">
+                    <img src="/static/img/slide_img/real esate.jpg" alt="Slide 3">
+                    <img src="/static/img/slide_img/retail.jpg" alt="Slide 4">
+                    <img src="/static/img/slide_img/technology.jpg" alt="Slide 5">
+                </div>
+                <button class="prev" onclick="moveSlide(-1)">&#10094;</button>
+                <button class="next" onclick="moveSlide(1)">&#10095;</button>
+            </div>
+            <div class="about-us">
+                <h2>About Us</h2>
+                <h1>Welcome to Z2H - Your Premier Destination for Health Care Supplements!</h1>
+                <p>Established in 2024, Z2H is your go-to online portal for top-quality health care supplements. At Z2H, we're committed to providing our customers with the finest supplements to support their well-being and vitality.</p>
+                <p>At Z2H, we believe in the power of collaboration. That's why we proudly support affiliate marketing, giving individuals the opportunity to partner with us and promote our products while earning a commission. Join our affiliate program today and start earning while helping others achieve their health goals.</p>
+                <p>Experience the difference with Z2H - where quality, integrity, and your well-being are our top priorities. Shop with us today and take the first step towards a healthier, happier you!</p>
+            </div>
+        </section>
+        <section class="products">
+            <h2>PRODUCTS</h2>
+            <div class="product-list">
+                <div class="card" style="width: 18rem;">
+                    <img src="/static/img/product/1.jpeg" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h3>Himalaya</h3>
+                      <p class="card-text">Himalaya Tan Removal Orange Face Wash, 100ml</p>
+                      <p class="card-text">Himalaya Pure Hands | Purifying Tulsi Hand Wash Refill - 750 ml | 99.9% Germ Protection</p>
+                      <p class="card-text">Himalaya Ayurveda Sandal Glow Soap 125g (Pack Of 4)</p>
+                    </div>
+                  </div>
+                <div class="card" style="width: 18rem;">
+                    <img src="/static/img/product/2.jpg" class="card-img-top" alt="...">
+                    <div class="card-body">
+                      <p class="card-text">Acnica Gel</p>
+                      <p class="card-text">Acne Pimple Care Nivca Healthcare</p>
+                      <p class="card-text">Acnica Pimple Care Soap(75gm.)</p>
+                      <p class="card-text"> Nivca Acnica Plus Cream 15 gm, For Personal, Packaging Type: Box</p>
+                      <p class="card-text">Nivcas Herbal Face Cream, Non prescription</p>
+                    </div>
+                  </div>
+                  <div class="card" style="width: 18rem;">
+                    <img src="/static/img/product/3.webp" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h3>P&G Health</h3>
+                      <p class="card-text">
+                        POLYBION ACTIVE
+                        WITH ADVANCED ENERGY RELEASE FORMULA
+                        Polybion Active aids energy release and supports immunity.</p>
+                      <p class="card-text">Neurobion® Forte
+                        Neurobion Forte Tablets is a combination of Vitamins B12, B1, B6, which helps provide relief from Tingling, Numbness and Burning Sensation, 30 Tablets.
+                      </p>
+                      <p class="card-text">
+                        Nasivion® Adult Drops 10 ml</p>
+                    </div>
+                  </div>
+                </div>
+                <!-- Add more product items as needed -->
+            </div>
+        </section>
+    </main>
+    <footer>
+        <div class="download-app">
+            <p>
+                Download APP  
+            </p>
+                <a href="https://play.google.com/" class="store-link">
+                    <img src="/static/img/playstore.png" alt="Play Store" class="store-icon">
+                </a>
+                <a href="https://www.apple.com/" class="store-link">
+                    <img src="/static/img/ios.png" alt="App Store" class="store-icon"> 
+                </a>
+          
+        </div>
+        
+        <div class="footer-links">
+            <a href="#">About Us</a>
+            <a href="#">Products</a>
+            <a href="#">Contact Us</a>
+            <a href="#">Terms & Conditions</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">FAQ</a>
+            <a href="#">News & Events</a>
+            <a href="#">Photo Gallery</a>
+        </div>
+    </footer>
+    <script src="/static/script.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+</body>
+</html>
