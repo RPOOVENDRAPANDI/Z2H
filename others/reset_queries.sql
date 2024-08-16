@@ -48,9 +48,9 @@ update public.user_z2hcustomers
 		level_two_commission_paid_date = null,
 		level_three_commission_paid_date = null,
 		level_four_commission_paid_date = null,
-		is_level_four_payment_issue = false,
 		is_level_one_payment_issue = false,
-		is_level_one_payment_issue = false,
-		is_level_two_payment_issue = false
+		is_level_two_payment_issue = false,
+		is_level_three_payment_issue = false,
+		is_level_four_payment_issue = false
 where
 	id = 1;

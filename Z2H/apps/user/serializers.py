@@ -183,6 +183,7 @@ class RoleSerializer(serializers.ModelSerializer):
 
 class CustomerSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='user.name')
+    email_address = serializers.SerializerMethodField()
     date_of_birth = serializers.SerializerMethodField()
     gender = serializers.SerializerMethodField()
     marital_status = serializers.SerializerMethodField()
@@ -227,7 +228,7 @@ class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Z2HCustomers
         fields = [
-            'uid', 'name', 'date_of_birth', 'gender', 'marital_status', 'mobile_number', 'aadhar_number', 'pan',
+            'uid', 'name', 'email_address', 'date_of_birth', 'gender', 'marital_status', 'mobile_number', 'aadhar_number', 'pan',
             'city', 'town', 'address', 'pin_code', 'name_of_bank', 'name_as_in_bank', 'ifsc_code', 'bank_branch',
             'account_number', 'plan', 'level_one_count', 'level_two_count', 'level_three_count', 'level_four_count',
             'plan_start_date', 'referrer_name', 'referrer_id', 'level_one_completed', 'level_two_completed',
@@ -236,6 +237,9 @@ class CustomerSerializer(serializers.ModelSerializer):
             'level_three_commission_status', 'level_four_commission_status', 'order_details', 'nominee_name',
             'customer_number', 'district', 'state', 'user_status', 'customer_uid',
         ]
+
+    def get_email_address(self, obj):
+        return RegisterUser.objects.get(user_id=obj.user_id).email_address
     
     def get_date_of_birth(self, obj):
         date_of_birth = RegisterUser.objects.get(user_id=obj.user_id).date_of_birth

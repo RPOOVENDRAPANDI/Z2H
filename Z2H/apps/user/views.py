@@ -361,10 +361,10 @@ class RegisterUserView(APIView):
                 "uid": user_uid,
             }
 
-            subject = "Zero To Hero Login Credentials"
-            body = f"The System Generated Password for Zero To Hero Login of User '{request_data['name']}' is {password}"
+            # subject = "Zero To Hero Login Credentials"
+            # body = f"The System Generated Password for Zero To Hero Login of User '{request_data['name']}' is {password}"
             
-            send_email(to_email=request_data['email_address'], body=body, subject=subject)
+            # send_email(to_email=request_data['email_address'], body=body, subject=subject)
 
             return Response(data=data, status=status.HTTP_201_CREATED)
 
@@ -609,6 +609,18 @@ class WebUserViewSet(viewsets.ModelViewSet):
         }
 
         return Response(data=data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['DELETE', ], url_path='delete_registered_user', url_name='delete-registered-user')
+    def delete_registered_user(self, request, *args, **kwargs):
+        registered_user_uid = request.data['registerUserUid']
+        registered_user = RegisterUser.objects.filter(uid=registered_user_uid).first()
+        if registered_user:
+            registered_user.delete()
+
+        user = registered_user.user
+        user.delete()
+
+        return Response(data={"status": "success"}, status=status.HTTP_200_OK)
 
 class CustomerViewSet(viewsets.ModelViewSet):
     authentication_classes = [authentication.TokenAuthentication]
