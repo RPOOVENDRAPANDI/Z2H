@@ -345,9 +345,7 @@ class CustomerSerializer(serializers.ModelSerializer):
         return obj.referrer.user.name if obj.referrer else ""
     
     def get_referrer_id(self, obj):
-        referrer = obj.referrer
-        customer = Z2HCustomers.objects.filter(user_id=referrer.user).first()
-        return customer.customer_number
+        return obj.referrer.customer_number
     
     def get_level_one_completed(self, obj):
         if obj.is_level_one_completed:

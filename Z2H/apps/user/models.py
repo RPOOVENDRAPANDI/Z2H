@@ -91,6 +91,15 @@ class Z2HCustomers(ZeroToHeroBaseModel):
     level_two_commission_paid_date = models.DateTimeField(null=True, blank=True)
     level_three_commission_paid_date = models.DateTimeField(null=True, blank=True)
     level_four_commission_paid_date = models.DateTimeField(null=True, blank=True)
+    is_referrer_got_notified_for_joined_level_one = models.BooleanField(default=False)
+    is_user_got_notified_for_level_one_completion = models.BooleanField(default=False)
+    is_user_got_notified_for_level_two_completion = models.BooleanField(default=False)
+    is_user_got_notified_for_level_three_completion = models.BooleanField(default=False)
+    is_user_got_notified_for_level_four_completion = models.BooleanField(default=False)
+    is_user_got_notified_for_level_one_commission_paid = models.BooleanField(default=False)
+    is_user_got_notified_for_level_two_commission_paid = models.BooleanField(default=False)
+    is_user_got_notified_for_level_three_commission_paid = models.BooleanField(default=False)
+    is_user_got_notified_for_level_four_commission_paid = models.BooleanField(default=False)
 
     def __str__(self):
         return self.customer_number
@@ -134,6 +143,7 @@ class RegisterUser(ZeroToHeroBaseModel):
     email_address = models.CharField(max_length=256, null=False, blank=False)
     alternate_mobile_number = models.CharField(max_length=64, null=True, blank=True)
     is_admin_user = models.BooleanField(default=False)
+    is_referrer_got_notified_for_joining = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name

@@ -170,6 +170,94 @@ class GetUserInfoView(APIView):
 
         return enable_payment, is_existing_user
     
+    def get_registered_users_under_user(self, request):
+        registered_users_under_user_all = RegisterUser.objects.filter(
+            referred_by__user=request.user, is_referrer_got_notified_for_joining=False
+        ).all()
+
+        # Remove registered users present in Z2hCustomers
+        registered_users_under_user = []
+        for registered_user in registered_users_under_user_all:
+            customer = Z2HCustomers.objects.filter(user=registered_user.user).first()
+            if not customer:
+                registered_users_under_user.append({
+                    "name": registered_user.name,
+                    "mobile_number": registered_user.mobile_number,
+                    "id": registered_user.id,
+                    "uid": registered_user.uid,
+                })
+
+        return registered_users_under_user
+    
+    def get_product_purchased_users_under_user(self, request):
+        referrer = Z2HCustomers.objects.filter(user=request.user).first()
+
+        customers_under_referrer = Z2HCustomers.objects.filter(
+            referrer=referrer, is_referrer_got_notified_for_joined_level_one=False,
+        ).all()
+
+        product_purchased_users_under_user = []
+        for customer in customers_under_referrer:
+            register_user = RegisterUser.objects.filter(user=customer.user).first()
+            if register_user:
+                product_purchased_users_under_user.append({
+                    "name": register_user.name,
+                    "mobile_number": register_user.mobile_number,
+                    "customer_number": customer.customer_number,
+                    "customer_uid": customer.uid,
+                })
+
+
+        return product_purchased_users_under_user
+
+    def get_level_completed_status_of_user(self, request):
+        level_one_completed_status = Z2HCustomers.objects.filter(
+            user=request.user, is_level_one_completed=True, is_user_got_notified_for_level_four_completion=False
+        )
+        level_two_completed_status = Z2HCustomers.objects.filter(
+            user=request.user, is_level_two_completed=True, is_user_got_notified_for_level_four_completion=False
+        )
+        level_three_completed_status = Z2HCustomers.objects.filter(
+            user=request.user, is_level_three_completed=True, is_user_got_notified_for_level_four_completion=False
+        )
+        level_four_completed_status = Z2HCustomers.objects.filter(
+            user=request.user, is_level_four_completed=True, is_user_got_notified_for_level_four_completion=False
+        )
+
+        level_completed_status_of_user = {
+            "level_one_completed": level_one_completed_status.exists(),
+            "level_two_completed": level_two_completed_status.exists(),
+            "level_three_completed": level_three_completed_status.exists(),
+            "level_four_completed": level_four_completed_status.exists(),
+        }
+
+        return level_completed_status_of_user
+    
+
+    def get_commission_paid_status_of_user(self, request):
+        level_one_commission_paid_status = Z2HCustomers.objects.filter(
+            user=request.user, is_level_one_commission_paid=True, is_user_got_notified_for_level_one_commission_paid=False
+        )
+        level_two_commission_paid_status = Z2HCustomers.objects.filter(
+            user=request.user, is_level_two_commission_paid=True, is_user_got_notified_for_level_two_commission_paid=False
+        )
+        level_three_commission_paid_status = Z2HCustomers.objects.filter(
+            user=request.user, is_level_three_commission_paid=True, is_user_got_notified_for_level_three_commission_paid=False
+        )
+        level_four_commission_paid_status = Z2HCustomers.objects.filter(
+            user=request.user, is_level_four_commission_paid=True, is_user_got_notified_for_level_four_commission_paid=False
+        )
+
+        commission_paid_status_of_user = {
+            "level_one_commission_paid": level_one_commission_paid_status.exists(),
+            "level_two_commission_paid": level_two_commission_paid_status.exists(),
+            "level_three_commission_paid": level_three_commission_paid_status.exists(),
+            "level_four_commission_paid": level_four_commission_paid_status.exists(),
+        }
+
+        return commission_paid_status_of_user
+
+    
     def get_user_info_for_mobile(self, request):
         data = {
             'status': 'success',
@@ -190,6 +278,14 @@ class GetUserInfoView(APIView):
         user_customer = Z2HCustomers.objects.filter(user=request.user).first()
 
         enable_payment, is_existing_user = self.get_check_user(request)
+
+        registered_users_under_user = self.get_registered_users_under_user(request)
+
+        product_purchased_users_under_user = self.get_product_purchased_users_under_user(request)
+
+        level_completed_status_of_user = self.get_level_completed_status_of_user(request)
+
+        commission_paid_status_of_user = self.get_commission_paid_status_of_user(request)
         
         user_info = {
             'registered_date': user.created,
@@ -223,6 +319,12 @@ class GetUserInfoView(APIView):
             "is_existing_user": is_existing_user,
             "user_customer_uid": user_customer.uid if user_customer else None,
             "user_customer_number": user_customer.customer_number if user_customer else None,
+            "is_user_under_no_plan": True if not user_customer else False,
+            "is_first_login": request.user.is_first_login,
+            "registered_users_under_user": registered_users_under_user,
+            "product_purchased_users_under_user": product_purchased_users_under_user,
+            "level_completed_status_of_user": level_completed_status_of_user,
+            "commission_paid_status_of_user": commission_paid_status_of_user,
         }
 
         data['user_info'] = user_info
@@ -361,10 +463,10 @@ class RegisterUserView(APIView):
                 "uid": user_uid,
             }
 
-            # subject = "Zero To Hero Login Credentials"
-            # body = f"The System Generated Password for Zero To Hero Login of User '{request_data['name']}' is {password}"
+            subject = "Zero To Hero Login Credentials"
+            body = f"The System Generated Password for Zero To Hero Login of User '{request_data['name']}' is {password}"
             
-            # send_email(to_email=request_data['email_address'], body=body, subject=subject)
+            send_email(to_email=request_data['email_address'], body=body, subject=subject)
 
             return Response(data=data, status=status.HTTP_201_CREATED)
 
@@ -1154,7 +1256,6 @@ class CustomerViewSet(viewsets.ModelViewSet):
         }
 
         return Response(data=data, status=status.HTTP_200_OK)
-    
 
 class DashboardReportView(APIView):
     def get(self, request, *args, **kwargs):
@@ -1203,6 +1304,10 @@ class DashboardReportView(APIView):
         return Response(data=data, status=status.HTTP_200_OK)
     
 class NoDownlineReportsView(APIView):
+
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
     def get(self, request, *args, **kwargs):
         customer = Z2HCustomers.objects.exclude(is_admin_user=True).values_list('id', flat=True)
 
@@ -1215,4 +1320,125 @@ class NoDownlineReportsView(APIView):
         return Response(data={
             "customers_not_got_downline": customer_not_got_downline_data
         }, status=status.HTTP_200_OK)
+
+
+class UpdateNotificationsView(APIView):
+
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_update_user_registration_status(self, register_uid):
+        RegisterUser.objects.filter(uid=register_uid).update(
+            is_referrer_got_notified_for_joining=True
+        )
+
+        return True
+    
+    def get_update_product_purchase_status(self, customer_uid):
+        Z2HCustomers.objects.filter(uid=customer_uid).update(
+            is_referrer_got_notified_for_joined_level_one=True
+        )
+
+        return True
+    
+    def get_update_level_completion_status(self, customer_uid, level):
+        if level == "one":
+            Z2HCustomers.objects.filter(uid=customer_uid).update(
+                is_user_got_notified_for_level_one_completion=True
+            )
+        elif level == "two":
+            Z2HCustomers.objects.filter(uid=customer_uid).update(
+                is_user_got_notified_for_level_two_completion=True
+            )
+        elif level == "three":
+            Z2HCustomers.objects.filter(uid=customer_uid).update(
+                is_user_got_notified_for_level_three_completion=True
+            )
+        elif level == "four":
+            Z2HCustomers.objects.filter(uid=customer_uid).update(
+                is_user_got_notified_for_level_four_completion=True
+            )
+
+        return True
+    
+    def get_update_commisison_paid_status(self, customer_uid, level):
+        if level == "one":
+            Z2HCustomers.objects.filter(uid=customer_uid).update(
+                is_user_got_notified_for_level_one_commission_paid=True
+            )
+        elif level == "two":
+            Z2HCustomers.objects.filter(uid=customer_uid).update(
+                is_user_got_notified_for_level_two_commission_paid=True
+            )
+        elif level == "three":
+            Z2HCustomers.objects.filter(uid=customer_uid).update(
+                is_user_got_notified_for_level_three_commission_paid=True
+            )
+        elif level == "four":
+            Z2HCustomers.objects.filter(uid=customer_uid).update(
+                is_user_got_notified_for_level_four_commission_paid=True
+            )
+
+        return True
+
+    def validate_inputs(self, notification_type, data, register_uid, customer_uid, level):
+        
+        if notification_type not in ["user_registration", "product_purchase", "level_completion", "commission_payment"]:
+            data["message"] = (
+                "Notification type must be like user_registration, product_purchase, level_completion or commission_payment. Invalid Notification Type!!!"
+            )
+            return data, False
+        
+        elif notification_type == "user_registration" and not register_uid:
+            data["message"] = "Register Uid Not Found!!!"
+            return data, False
+
+        elif notification_type and not customer_uid:
+            data["message"] = "Customer Uid Not Found!!!"
+            return data, False
+        
+        elif notification_type in ["level_completion", "commission_payment"] and not level:
+            data["message"] = "Level Not Found!!!"
+            return data, False
+        
+        elif notification_type in ["level_completion", "commission_payment"] and level not in ["one", "two", "three", "four"]:
+            data["message"] = "Level must be like one, two, three or four. Invalid level!!!"
+            return data, False
+
+        return data, True
+
+    def put(self, request, *args, **kwargs):
+        notification_type = request.data.get("notificationType", None)
+        register_uid = request.data.get("registerUid", None)
+        customer_uid = request.data.get("customerUid", None)
+        level = request.data.get("level", None)
+
+        data = {
+            "status": "Error"
+        }
+
+        success_response = status.HTTP_200_OK
+        error_response = status.HTTP_400_BAD_REQUEST
+
+        data, validation_status = self.validate_inputs(notification_type, data, register_uid, customer_uid, level)
+
+        if not validation_status:
+            return Response(data=data, status=error_response)
+        
+        if notification_type == "user_registration" and register_uid:
+            self.get_update_user_registration_status(register_uid)
+
+        if notification_type == "product_purchase" and customer_uid:
+            self.get_update_product_purchase_status(customer_uid)
+
+        if notification_type == "level_completion" and customer_uid and level:
+            self.get_update_level_completion_status(customer_uid, level)
+
+        if notification_type == "commission_payment" and customer_uid and level:
+            self.get_update_commisison_paid_status(customer_uid, level)
+
+        data["status"] = "Success"
+        data["message"] = "Notification Updated Successfully!!!"
+
+        return Response(data=data, status=success_response)
 
