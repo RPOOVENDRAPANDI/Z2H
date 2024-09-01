@@ -130,6 +130,7 @@ class Z2HOrderSerializer(serializers.ModelSerializer):
     referrer_id = serializers.SerializerMethodField()
     referrer_name = serializers.SerializerMethodField()
     referrer_mobile_number = serializers.SerializerMethodField()
+    customer_address = serializers.SerializerMethodField()
 
     class Meta:
         model = Z2HOrders
@@ -137,7 +138,7 @@ class Z2HOrderSerializer(serializers.ModelSerializer):
             'order_id', 'order_date', 'total_product_price', 'order_cgst_amount', 'order_sgst_amount', 'order_igst_amount', 'order_gst_total_amount',
             'order_total_amount', 'order_status', 'delivery_date', 'delivery_through', 'delivery_number', 'delivery_address',
             'payment_mode', 'payment_status', 'payment_date', 'payment_reference', 'customer_name', 'customer_number', 'mobile_number',
-            'courier_date', 'delivery_date', 'order_items', 'order_number', 'uid', 'referrer_id', 'referrer_name',
+            'courier_date', 'delivery_date', 'order_items', 'order_number', 'uid', 'referrer_id', 'referrer_name', 'customer_address',
             'referrer_mobile_number',
         )
 
@@ -187,6 +188,9 @@ class Z2HOrderSerializer(serializers.ModelSerializer):
     
     def get_mobile_number(self, obj):
         return RegisterUser.objects.filter(user=obj.ordered_by).first().mobile_number
+    
+    def get_customer_address(self, obj):
+        return RegisterUser.objects.filter(user=obj.ordered_by).first().address
     
     def get_order_igst_amount(self, obj):
         return obj.order_igst_amount if obj.order_igst_amount else 0.00

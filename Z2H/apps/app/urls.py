@@ -39,4 +39,5 @@ urlpatterns += [
     ),
     path('web_user_role_page/', views.Z2HWebPageRolesView.as_view(), name='web_user_role_page'),
     path('products_plan_map/', views.Z2HProductsPlanMapView.as_view(), name='products-pan-map'),
+    path('download_orders_template/<str:from_date>/<str:to_date>/<str:order_status>/', views.z2h_get_orders_template, name='download_orders_template'),
 ]

@@ -37,6 +37,9 @@ from apps.user.models import Z2HCustomers, RegisterUser, Role
 from apps.app.permissions import CustomerExistsPermission
 from apps.utils.models import Z2HSettings
 from django.utils import timezone
+from django.http import FileResponse
+import csv
+import io
 import os
 
 # Create your views here.
@@ -821,3 +824,58 @@ class Z2HProductsReturedViewset(ModelViewSet):
     serializer_class = Z2HProductsReturedSerializer
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [authentication.TokenAuthentication]
+
+def z2h_get_orders_template(request, from_date, to_date, order_status):
+    orders = Z2HOrders.objects.filter(
+        order_status=order_status
+    )
+
+    if from_date and to_date:
+        orders = orders.filter(
+            order_date__range=[from_date, to_date]
+        )
+
+    orders_data = Z2HOrderSerializer(orders, many=True).data
+
+    file_headers = [
+        'ORDER ID', 'ORDER DATE', 'CUSTOMER NAME', 'MOBILE NO.', 'ORDER TOTAL AMOUNT', 'DELIVERY ADDRESS', 'COURIER NAME', 'COURIER DATE [dd-mm-yyyy]', 
+        'COURIER TRACKING NO.'
+    ]
+
+    csv_data = io.StringIO()
+    csv_writer = csv.writer(csv_data)
+
+    csv_writer.writerow(file_headers)
+
+    for order in orders_data:
+        delivery_address = order.get("delivery_address", None) or order.get("customer_address")
+
+        data = [
+            order["order_number"], 
+            order["order_date"], 
+            order["customer_name"], 
+            order["mobile_number"], 
+            order["order_total_amount"],
+            delivery_address, 
+            '', 
+            '', 
+            '',
+        ]
+
+        csv_writer.writerow(data)
+
+    file_path = '/tmp/orders_download.csv'
+
+    # Save the CSV data to a temporary file
+    with open(file_path, 'w') as file:
+        file.write(csv_data.getvalue())
+
+    csv_file = open(file_path, 'rb')
+    csv_data = csv_file.read().decode('utf-8')
+    csv_file.close()
+
+    os.remove(file_path)
+
+    return FileResponse(csv_data, content_type='text/csv', filename='yet_to_be_couriered_orders.csv')
+
+    
