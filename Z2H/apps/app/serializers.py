@@ -110,13 +110,13 @@ class Z2HProductSerializer(serializers.ModelSerializer):
         return None
     
 class Z2HOrderSerializer(serializers.ModelSerializer):
-    order_id = serializers.CharField(source='order_number')
+    order_id = serializers.SerializerMethodField(method_name='get_order_id')
     order_date = serializers.SerializerMethodField()
     courier_date = serializers.SerializerMethodField()
     delivery_date = serializers.SerializerMethodField()
     delivery_through = serializers.SerializerMethodField()
     delivery_number = serializers.SerializerMethodField()
-    delivery_address = serializers.SerializerMethodField()
+    delivery_address = serializers.SerializerMethodField(method_name='get_delivery_address')
     payment_mode = serializers.SerializerMethodField()
     payment_status = serializers.SerializerMethodField()
     payment_date = serializers.SerializerMethodField()
@@ -156,6 +156,9 @@ class Z2HOrderSerializer(serializers.ModelSerializer):
         if not obj.delivery_details:
             return None
         return obj.delivery_details.get('delivery_address', None)
+    
+    def get_order_id(self, obj):
+        return obj.order_number
     
     def get_payment_mode(self, obj):
         if not obj.payment_details:
@@ -203,6 +206,9 @@ class Z2HOrderSerializer(serializers.ModelSerializer):
     
     def get_delivery_date(self, obj):
         return obj.delivery_date.strftime("%d-%m-%Y") if obj.delivery_date else None
+    
+    def get_pagination_data(self, obj):
+        return {"data": obj, "total": len(obj)}
     
     def get_order_status(self, obj):
         if not obj.order_status:
