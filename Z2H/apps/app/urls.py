@@ -22,6 +22,12 @@ urlpatterns += [
     path(
         r'products_list/', views.Z2HProductsListView.as_view(), name="products_list"
     ),
+    #  path(
+    #     r'ordersitemcount', views.Z2HOrderItemCount.as_view(), name="ordersitemcount"
+    # ),
+     path(
+        r'ordersitesearch/<str:order_number>', views.Z2HOrdersSearchView.as_view(), name="ordersitesearch"
+    ),
     path(
         r'orders_details/<str:product_uid>/', views.Z2HOrdersListView.as_view(), name="orders_details"
     ),

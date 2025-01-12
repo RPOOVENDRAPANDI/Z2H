@@ -6,6 +6,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework import authentication, permissions, status
 from rest_framework import filters
 from rest_framework.decorators import action
+from django.core.paginator import Paginator
 from .models import (
     Z2HPlanDetails,
     Z2HProductCategories,
@@ -195,6 +196,30 @@ class Z2HProductsPlanMapView(APIView):
         Z2HProducts.objects.filter(uid__in=product_uid).update(plan=plan_obj, is_active=True)
 
         return Response({"status": "success", "message": "Plan map updated successfully"}, status=status.HTTP_200_OK)
+
+class Z2HOrdersSearchView(ListAPIView):
+    queryset = Z2HOrders.objects.all()
+    serializer_class = Z2HOrderSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [authentication.TokenAuthentication]
+    
+    def get_queryset(self):
+        return Z2HOrders.objects.filter(order_number__icontains=str(self.kwargs['order_number']))
+    
+    def get(self, request, *args, **kwargs):
+        data = self.get_queryset()
+        return Response(data, status=status.HTTP_200_OK)
+    
+class Z2HOrderItemCount(ListAPIView):
+    queryset = Z2HOrders.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [authentication.TokenAuthentication]
+    
+    def get(self, request, *args, **kwargs):
+        data = {
+            "order_count": round(self.queryset.count() / 10)
+        }
+        return Response(data, status=status.HTTP_200_OK)
     
     
 class Z2HOrdersListView(ListAPIView):
@@ -226,7 +251,26 @@ class Z2HOrdersViewSet(ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [authentication.TokenAuthentication]
     lookup_field = 'uid'
+    
+    def get_paginationData(self, queryset, page="1", rowsPerPage="10"):
+        paginator = Paginator(queryset, rowsPerPage)
+        page_obj = paginator.get_page(page)
+        data = {
+            "data": page_obj.object_list,
+            "total_page_count":round(queryset.count()/10),
+        }
+        return data
+    
+    def list(self, request, *args, **kwargs): 
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        page = self.request.query_params.get('page', None)
+        rowsPerPage = self.request.query_params.get('rowsPerPage', None)
 
+        pagination_data = self.get_paginationData(queryset, page=page, rowsPerPage=rowsPerPage)
+        pagination_data['data'] = self.get_serializer(pagination_data['data'], many=True).data
+        return Response(pagination_data, status=status.HTTP_200_OK)
+        
     def get_queryset(self):
         from_date = self.request.query_params.get('fromDate', None)
         to_date = self.request.query_params.get('toDate', None)
@@ -237,11 +281,12 @@ class Z2HOrdersViewSet(ModelViewSet):
 
         if from_date and to_date:
             if order_status == 'all':
-                return self.queryset.filter(order_date__range=[from_date, to_date])
-            return self.queryset.filter(order_date__range=[from_date, to_date], order_status=order_status)
+                return self.queryset.filter(order_date__range=[from_date, to_date]).order_by("order_number")
+            else:
+                return self.queryset.filter(order_date__range=[from_date, to_date], order_status=order_status)
         
-        return self.queryset
-
+        return self.queryset.order_by("order_number")[:10]
+    
     def partial_update(self, request, *args, **kwargs):
         orders = Z2HOrders.objects.filter(uid=kwargs['uid']).first()
 

@@ -217,6 +217,7 @@ class CustomerSerializer(serializers.ModelSerializer):
     level_one_completed_date = serializers.SerializerMethodField()
     level_two_completed_date = serializers.SerializerMethodField()
     level_three_completed_date = serializers.SerializerMethodField()
+    level_four_completed_date = serializers.SerializerMethodField()
     level_one_commission_status = serializers.SerializerMethodField()
     level_two_commission_status = serializers.SerializerMethodField()
     level_three_commission_status = serializers.SerializerMethodField()
