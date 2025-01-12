@@ -28,6 +28,7 @@ from django.db.models import Q
 from django.utils import timezone
 from django.utils.dateparse import parse_date
 from datetime import timedelta
+from django.core.paginator import Paginator
 
 LOOKUP_REGEX = '[0-9a-f-]{36}'
 
@@ -733,6 +734,15 @@ class CustomerViewSet(viewsets.ModelViewSet):
     lookup_url_kwarg = 'uid'
     lookup_value_regex = LOOKUP_REGEX
 
+    def get_paginationData(self, queryset, page="1", rowsPerPage="10"):
+        paginator = Paginator(queryset, rowsPerPage)
+        page_obj = paginator.get_page(page)
+        data = {
+            "data": page_obj.object_list,
+            "total_page_count":round(queryset.count()/int(rowsPerPage)),
+        }
+        return data
+    
     def get_queryset(self):
         queryset = self.queryset.filter(is_active=True).order_by('id')
         
@@ -741,11 +751,23 @@ class CustomerViewSet(viewsets.ModelViewSet):
             queryset = queryset.exclude(id=first_record.id)
 
         return queryset
+    
+    def list(self, request, *args, **kwargs): 
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        page = self.request.query_params.get('page', None)
+        rowsPerPage = self.request.query_params.get('rowsPerPage', None)
+
+        pagination_data = self.get_paginationData(queryset, page=page, rowsPerPage=rowsPerPage)
+        pagination_data['data'] = self.get_serializer(pagination_data['data'], many=True).data
+        return Response(pagination_data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET', ], url_path='customer_details', url_name='customer-details')
     def get_customer_details(self, request, *args, **kwargs):
         customer_uid = request.query_params.get('customer_uid', None)
-
+        page = request.query_params.get('page', None)
+        row_per_page = request.query_params.get('rowPerPage', None)
+        
         if not customer_uid:
             data = {
                 "status": "Error",
