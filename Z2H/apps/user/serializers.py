@@ -225,6 +225,7 @@ class CustomerSerializer(serializers.ModelSerializer):
     order_details = serializers.SerializerMethodField()
     user_status = serializers.SerializerMethodField()
     customer_uid = serializers.CharField(source='uid')
+    is_level_four_completed = serializers.BooleanField()
 
     class Meta:
         model = Z2HCustomers
@@ -236,7 +237,7 @@ class CustomerSerializer(serializers.ModelSerializer):
             'level_three_completed', 'level_four_completed', 'level_one_completed_date', 'level_two_completed_date',
             'level_three_completed_date', 'level_four_completed_date', 'level_one_commission_status', 'level_two_commission_status',
             'level_three_commission_status', 'level_four_commission_status', 'order_details', 'nominee_name',
-            'customer_number', 'district', 'state', 'user_status', 'customer_uid',
+            'customer_number', 'district', 'state', 'user_status', 'customer_uid','is_level_four_completed'
         ]
 
     def get_email_address(self, obj):
