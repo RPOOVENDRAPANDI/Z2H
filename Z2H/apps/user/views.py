@@ -467,8 +467,11 @@ class RegisterUserView(APIView):
             subject = "Zero To Hero Login Credentials"
             body = f"The System Generated Password for Zero To Hero Login of User '{request_data['name']}' is {password}"
             
-            send_email(to_email=request_data['email_address'], body=body, subject=subject)
-
+            try:
+                send_email(to_email=request_data['email_address'], body=body, subject=subject)
+            except Exception as e:
+                return Response(data={"error:failed on sending the email to the user,check on your smtp username and password"}, status=status.HTTP_201_CREATED)
+            
             return Response(data=data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
