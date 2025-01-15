@@ -5,7 +5,7 @@ import os
 
 class ReferrerLimitPermission(permissions.BasePermission):
     def has_permission(self, request, view):
-        if request.method in ['PATCH', 'PUT']:
+        if request.method in ['PATCH', 'PUT','POST']:
             return True
         
         referred_by = request.data.get('referred_by', None)
