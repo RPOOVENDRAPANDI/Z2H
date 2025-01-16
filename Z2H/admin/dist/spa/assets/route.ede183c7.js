@@ -1,1 +1,0 @@
-import{f as t}from"./index.9310f85f.js";import{u as a}from"./axios.e06b1dc4.js";const r=a();var u=t(({router:o})=>{o.beforeEach(async(n,e,s)=>{r.token&&!r.userInfo&&r.getUserInfo(),i(n,e,s)})});const i=(o,n,e)=>{if(!r.token&&o.name!=="sign-in")return e({name:"sign-in"});if(!o.name)return e({name:"sign-in"});e()};export{u as default,i as validateRoutes};
