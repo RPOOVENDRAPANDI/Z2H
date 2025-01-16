@@ -131,6 +131,10 @@ class Z2HOrderSerializer(serializers.ModelSerializer):
     referrer_name = serializers.SerializerMethodField()
     referrer_mobile_number = serializers.SerializerMethodField()
     customer_address = serializers.SerializerMethodField()
+    city = serializers.SerializerMethodField()
+    town = serializers.SerializerMethodField()
+    pincode = serializers.SerializerMethodField()
+    district = serializers.SerializerMethodField()
 
     class Meta:
         model = Z2HOrders
@@ -139,7 +143,7 @@ class Z2HOrderSerializer(serializers.ModelSerializer):
             'order_total_amount', 'order_status', 'delivery_date', 'delivery_through', 'delivery_number', 'delivery_address',
             'payment_mode', 'payment_status', 'payment_date', 'payment_reference', 'customer_name', 'customer_number', 'mobile_number',
             'courier_date', 'delivery_date', 'order_items', 'order_number', 'uid', 'referrer_id', 'referrer_name', 'customer_address',
-            'referrer_mobile_number',
+            'referrer_mobile_number','pincode','city','town','district'
         )
 
     def get_delivery_through(self, obj):
@@ -194,6 +198,18 @@ class Z2HOrderSerializer(serializers.ModelSerializer):
     
     def get_customer_address(self, obj):
         return RegisterUser.objects.filter(user=obj.ordered_by).first().address
+    
+    def get_city(self, obj):
+        return RegisterUser.objects.filter(user=obj.ordered_by).first().city
+    
+    def get_town(self, obj):
+        return RegisterUser.objects.filter(user=obj.ordered_by).first().town
+    
+    def get_pincode(self, obj):
+        return RegisterUser.objects.filter(user=obj.ordered_by).first().pin_code
+    
+    def get_district(self, obj):
+        return RegisterUser.objects.filter(user=obj.ordered_by).first().district.name
     
     def get_order_igst_amount(self, obj):
         return obj.order_igst_amount if obj.order_igst_amount else 0.00
