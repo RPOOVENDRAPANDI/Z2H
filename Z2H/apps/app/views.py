@@ -266,7 +266,6 @@ class Z2HOrdersViewSet(ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         page = self.request.query_params.get('page', None)
         rowsPerPage = self.request.query_params.get('rowsPerPage', None)
-
         pagination_data = self.get_paginationData(queryset, page=page, rowsPerPage=rowsPerPage)
         pagination_data['data'] = self.get_serializer(pagination_data['data'], many=True).data
         return Response(pagination_data, status=status.HTTP_200_OK)
